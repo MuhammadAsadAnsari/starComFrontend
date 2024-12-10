@@ -5,7 +5,8 @@ services:
     image: syedowaisnoor/starcom-optimizer-front-end:latest
     container_name: react-vite-nginx
     ports:
-      - "80:80"    # Expose Nginx on port 80
+      - "80:80"     # Expose Nginx on port 80
+      - "8001:8001" # Expose port 8001
     volumes:
       - .:/app      # Mount the current directory to the container for live code updates
     environment:
