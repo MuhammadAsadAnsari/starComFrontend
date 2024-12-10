@@ -5,6 +5,10 @@ services:
   react-app:
     image: syedowaisnoor/starcom-optimizer-front-end  # Use the pre-built image from Docker Hub
     container_name: react-app
+    working_dir: /app
+    volumes:
+      - ./src:/app  # Assuming the source code is in the src directory
+    command: ["npm", "run", "build"]  # Run the build process
     networks:
       - app-network
     # No need for a build context, we are using the pre-built image
