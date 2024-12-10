@@ -10,6 +10,7 @@ const SideNav = () => {
     localStorage.removeItem("authCookie");
     window.location.href = "/login";
     localStorage.removeItem("lastVisitedRoute");
+    localStorage.removeItem("userRole");
   };
 
 

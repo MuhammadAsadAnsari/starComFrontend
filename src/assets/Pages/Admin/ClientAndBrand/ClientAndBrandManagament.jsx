@@ -36,6 +36,7 @@ const ClientAndBrandManagement = () => {
   const authToken = atob(encryptedToken);
 
   const fetchClientsWithBrands = async (page = 1, limit = 10) => {
+    console.log("🚀 ~ fetchClientsWithBrands ~ page:", page,limit)
     try {
       const response = await fetch(
         `${devTunnelUrl}get_clients_with_brands?page=${page}&limit=${limit}&search=${searchTerm}`,

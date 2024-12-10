@@ -19,7 +19,6 @@ const Pagination = ({ currentPage, totalPages, setCurrentPage }) => {
         <button
           key={page}
           onClick={() => {
-            console.log(page)
             setCurrentPage(page)}}
           className={`font-semibold px-4 py-2 rounded-full transition duration-300 ${
             currentPage === page
