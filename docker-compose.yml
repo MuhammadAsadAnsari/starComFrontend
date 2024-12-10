@@ -7,6 +7,8 @@ services:
     container_name: react-app
     networks:
       - app-network
+    ports:
+      - "8001:80"
     # Since it's a pre-built image, no need for command or volume for src code
 
   # Nginx service (for serving the app)
@@ -14,7 +16,7 @@ services:
     image: nginx:alpine  # Use the official Nginx image for serving
     container_name: nginx
     ports:
-      - "8001:80"  # Expose port 80 inside the container on port 8001 externally
+      - "80:80"  # Expose port 80 inside the container on port 8001 externally
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro  # Mount the custom Nginx config
       - ./dist:/usr/share/nginx/html  # Mount the built React app output into Nginx's html directory
