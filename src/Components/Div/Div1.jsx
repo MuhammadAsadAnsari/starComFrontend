@@ -149,7 +149,7 @@ let fileRateInputRef = useRef(null);
         ...(rate === "uploadRateFile" && rateFile
           ? { rate_file: rateFile }
           : {}),
-        ...(rate != "uploadRateFile" && { select: rate }),
+            select: rate ||"",
         dates: {
           Start_Date: formatDate(startDate),
           End_Date: formatDate(endDate),

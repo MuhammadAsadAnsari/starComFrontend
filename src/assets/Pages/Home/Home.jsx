@@ -220,31 +220,18 @@ const handleSubmit = async () => {
     };
 
     const formData = new FormData();
+    console.log("fields.input_file", fields.input_file);
     formData.append("user_data", JSON.stringify(newfields));
     formData.append("input_file", fields.input_file);
+
     if (fields.rate_file) formData.append("rate_file", fields.rate_file);
 
-    // Convert file to Base64
-    const convertFileToBase64 = (file) => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
-        reader.readAsDataURL(file);
-      });
-    };
+    
 
     try {
       // Store input_file and rate_file in sessionStorage as Base64
-      if (fields.input_file) {
-        const inputFileBase64 = await convertFileToBase64(fields.input_file);
-        sessionStorage.setItem("input_file", inputFileBase64);
-      }
-
-      if (fields.rate_file) {
-        const rateFileBase64 = await convertFileToBase64(fields.rate_file);
-        sessionStorage.setItem("rate_file", rateFileBase64);
-      }
+    
+    console.log("🚀 ~ handleSubmit ~ formData:", formData);
 
       const response = await fetch(`${devTunnelUrl}generate-ratings-report`, {
         method: "POST",
@@ -256,13 +243,13 @@ const handleSubmit = async () => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log("🚀 ~ handleSubmit ~ data:", data)
         sessionStorage.setItem("data", JSON.stringify(data));
         sessionStorage.setItem("user_data", JSON.stringify(newfields));
 
-        console.log("Files and data stored successfully in sessionStorage");
-        // navigate('/summary');
+        navigate('/summary');
       } else {
-        console.error("Error fetching the PDF:", response.message);
+        console.error("Error creating summary:", response.message);
       }
     } catch (error) {
       console.error("Error submitting data:", error);
@@ -271,6 +258,8 @@ const handleSubmit = async () => {
       setIsLoading(false);
     }
   }
+
+
 };
 
 

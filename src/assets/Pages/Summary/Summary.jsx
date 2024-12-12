@@ -3,44 +3,37 @@ import LogoImageBlack from "../../../Components/Images/LogoImageBlack";
 import Button from "../../../Components/buttons/Button";
 
 const Summary = () => {
+    const [isDownloaded,setIsDownloaded] = useState(false)
   const sampleData = JSON.parse(sessionStorage.getItem("data"));
   const devTunnelUrl = import.meta.env.VITE_DEV_TUNNEL_URL;
   const encryptedToken = localStorage.getItem("authCookie");
   const authToken = atob(encryptedToken);
-
-  const user_data = JSON.parse(sessionStorage.getItem("user_data"));
-  console.log("🚀 ~ Summary ~ user_data:", user_data);
+  const data = JSON.parse(sessionStorage.getItem("data"));
+  
+  let user_data = JSON.parse(sessionStorage.getItem("user_data"));
   const rateType = user_data.select;
 
-  const retrieveFileFromSession = (key) => {
-    const base64File = sessionStorage.getItem(key);
-    if (!base64File) return null;
-
-    const byteString = atob(base64File.split(",")[1]);
-    const mimeString = base64File.split(",")[0].split(":")[1].split(";")[0];
-    const arrayBuffer = new Uint8Array(byteString.length);
-
-    for (let i = 0; i < byteString.length; i++) {
-      arrayBuffer[i] = byteString.charCodeAt(i);
-    }
-
-    return new Blob([arrayBuffer], { type: mimeString });
+  user_data = {
+    brand_id: user_data.brand_id,
+    budget: user_data.budget,
+    client_id: user_data.client_id,
+    dates: user_data.dates,
+    day_part: user_data.day_part,
+    genre: user_data.genre,
+    no_of_copies: user_data.no_of_copies,
+    select: user_data.select,
+    download: true,
   };
+  console.log("🚀 ~ Summary ~ user_data:", user_data);
 
-  // Example usage
+  const formData = new FormData();
+
+  formData.append("user_data", JSON.stringify(user_data));
+  formData.append("user_data_key", data.user_data_key);
+if (data.rate_file_key) formData.append("rate_file_key", data.rate_file_key);
 
   const handleDownload = async () => {
-    const inputFileBlob = retrieveFileFromSession("input_file");
-    const rateFileBlob = retrieveFileFromSession("rateFileBlob");
-
-    if (!inputFileBlob) return toast.error(`Something went wrong downloading`);
-    const formData = new FormData();
-    formData.append("input_file", inputFileBlob, "input_file.xlsx");
-    if (rateFileBlob)
-      formData.append("rate_file", rateFileBlob, "rate_file.xlsx");
-    formData.append("user_data", JSON.stringify(user_data));
-
-    fetch(`${devTunnelUrl}/download_client_rates?download=true`, {
+    fetch(`${devTunnelUrl}generate-ratings-report`, {
       method: "POST",
       headers: {
         Authorization: `${authToken}`,
@@ -49,7 +42,7 @@ const Summary = () => {
     })
       .then((response) => {
         if (!response.ok) {
-          // console.log("response.arrayBuffer()", response.arrayBuffer());
+     
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         return response.arrayBuffer();
@@ -57,18 +50,20 @@ const Summary = () => {
       .then((buffer) => {
         console.log("Buffer data:", buffer);
 
-        // Convert buffer to a Blob or save it as a file
+
         const blob = new Blob([buffer]);
+        console.log("🚀 ~ .then ~ blob:", blob)
         const url = URL.createObjectURL(blob);
+        console.log("🚀 ~ .then ~ url:", url)
 
         // Create a download link (for example)
         const a = document.createElement("a");
         a.href = url;
-        a.download = "summary.xlsx"; // Change file extension accordingly
+        a.download = "summary.xlsx"; 
         a.click();
 
-        // Revoke object URL to free memory
         URL.revokeObjectURL(url);
+        setIsDownloaded(true);
       })
       .catch((error) => {
         console.error("Error fetching the buffer:", error);
@@ -84,11 +79,11 @@ const Summary = () => {
         {/* <button className="bg-gradient-to-r from-[#E73C30] to-[#F58220] text-white px-4 py-2 rounded-md">
           Download TV Schedule
         </button> */}
-        <Button
+     {!isDownloaded &&(   <Button
           text="Download Tv Schedule"
           styling="px-2"
           onClick={handleDownload}
-        />
+        />)}
       </div>
 
       {/* Schedule Created Text */}
@@ -114,7 +109,7 @@ const Summary = () => {
                 </tr>
               </thead>
               <tbody>
-                {sampleData?.channel_summary?.lenght > 0 &&
+                {sampleData?.channel_summary?.length > 0 &&
                   sampleData?.channel_summary?.map?.((item, index) => (
                     <tr key={index} className="border-t">
                       <td className="px-4 py-2">{item.name}</td>

@@ -43,12 +43,10 @@ const GetAllUsers = () => {
           }
         );
         const data = await response.json();
-        console.log("🚀 ~ fetchUsers ~ data:", data)
 
         if (response.ok) {
           setUsers(data.data);
           const _totalRecords = data.total
-          console.log("🚀 ~ fetchUsers ~ _totalRecords:", _totalRecords)
           setTotalRecords(_totalRecords);
         } else {
           toast.error(data.message || "Failed to fetch users.");
@@ -69,7 +67,6 @@ const GetAllUsers = () => {
   const totalPages = Math.ceil(totalRecords / usersPerPage);
   
   const openModal = (type="add", user = {}) => {
-    console.log("🚀 ~ openModal ~ type:", type)
     setModalType(type);
     setSelectedUser(
       type === "edit"
@@ -90,8 +87,6 @@ const GetAllUsers = () => {
   const closeDeleteModal = () => setOpenDeleteModel(false);
 
   const handleSubmit = async (type) => {
-    console.log("modalType", modalType);
-    console.log('handleSubmits',selectedUser)
     if (
       selectedUser?.confirmPassword &&
       selectedUser?.password !== selectedUser?.confirmPassword
@@ -103,7 +98,6 @@ const GetAllUsers = () => {
 
     if (modalType === "add") {
       const { name, email, password, confirmPassword, role } = selectedUser;
-  console.log("adding")
       if (!name || !email || !password || !confirmPassword || !role) {
         toast.error("All fields are required.");
         return;
@@ -122,12 +116,10 @@ const GetAllUsers = () => {
       ...(selectedUser?.role && { role: selectedUser.role }),
     };
 
-    console.log("🚀 ~ handleSubmit ~ newUser:", newUser,type);
 
     try {
       let response;
       let data;
-    console.log("🚀 ~ handleSubmit ~ modalType:", modalType);
       if (modalType === "add") {
         // Add user (POST request)
         response = await fetch(`${devTunnelUrl}add_user`, {
@@ -139,7 +131,6 @@ const GetAllUsers = () => {
           body: JSON.stringify(newUser),
         });
         data = await response.json();
-        console.log("🚀 ~ handleSubmit ~ data:", data);
 
         if (response.ok) {
           toast.success("User added successfully!");
@@ -150,11 +141,11 @@ const GetAllUsers = () => {
           toast.error(data.message || "Failed to add user.");
         }
       } else if (modalType === "edit") {
-        console.log("hitting",type,type == "delete")
-        console.log("item,acti", active, newUser, selectedUser.id ,userId);
+    
         // Update user (PUT request)
+        const id = type == "delete" ? userId:selectedUser.id
         response = await fetch(
-          `${devTunnelUrl}update_user/${selectedUser.id || userId}`,
+          `${devTunnelUrl}update_user/${id}`,
           {
             method: "PUT",
             headers: {
@@ -165,7 +156,6 @@ const GetAllUsers = () => {
           }
         );
         data = await response.json();
-        console.log("🚀 ~ handleSubmit ~ data:", data)
 
         if (response.ok) {
           toast.success("User updated successfully!");
@@ -199,7 +189,6 @@ const GetAllUsers = () => {
     setSelectedUser((prev) => ({ ...prev, [name]: value }));
   };
   const openAlert = (type,Id,active) => {
-    console.log("🚀 ~ openAlert ~ item:", active)
     setActive(active)
     setUserId(Id)
     setModalType(type)
@@ -321,7 +310,7 @@ const GetAllUsers = () => {
                 Do you want to {active ? "Deactivate" : "Activate"} this User?
               </h1>
             </div>
-            <AddButton text="Yes" handleSubmit={handleSubmit} />
+            <AddButton text="Yes" handleSubmit={()=>handleSubmit("delete")} />
           </div>
         </div>
       )}
