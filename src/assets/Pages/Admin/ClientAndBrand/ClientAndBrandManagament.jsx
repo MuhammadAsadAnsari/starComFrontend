@@ -36,7 +36,6 @@ const ClientAndBrandManagement = () => {
   const authToken = atob(encryptedToken);
 
   const fetchClientsWithBrands = async (page = 1, limit = 10) => {
-    console.log("🚀 ~ fetchClientsWithBrands ~ page:", page,limit)
     try {
       const response = await fetch(
         `${devTunnelUrl}get_clients_with_brands?page=${page}&limit=${limit}&search=${searchTerm}`,
@@ -51,10 +50,8 @@ const ClientAndBrandManagement = () => {
 
       if (response.ok) {
         const _data = await response.json();
-        console.log("🚀  ~ _data:", _data)
         const data = _data.data;
         const totalRecords = _data.records;
-        console.log("🚀  ~ totalRecords:", totalRecords)
 
         setTotalRecords(totalRecords);
         setClients(Array.isArray(data) ? data : []);
@@ -160,7 +157,6 @@ const ClientAndBrandManagement = () => {
   };
 
   const openModal = (type, data) => {
-    console.log("🚀 ~ openModal ~ data:", data)
     setIsModalOpen(true);
     setNewClient(data.client.name);
     setNewClientId(data.client.id);
@@ -182,7 +178,6 @@ const ClientAndBrandManagement = () => {
   };
 
   const updateClientAndBrand = async () => {
-    console.log("updateClientAndBrand",newClient, selectedOptions,active,newClientId);
     try {
 
       const response = await fetch(`${devTunnelUrl}update_client_or_brands/${newClientId}`, {
@@ -202,7 +197,6 @@ const ClientAndBrandManagement = () => {
           },
         }),
       });
-      console.log("response",response);
 
       if (response.ok) {
         fetchClientsWithBrands(currentPage, limit);
@@ -234,7 +228,6 @@ const ClientAndBrandManagement = () => {
     setSelectedOptions(selected);
   };
   const openAlert = (type, Id, active) => {
-    console.log("🚀 ~ openAlert ~ item:", active, Id);
     // return;
     setActive(active);
     setNewClientId(Id);

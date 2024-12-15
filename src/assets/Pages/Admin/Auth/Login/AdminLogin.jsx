@@ -9,7 +9,6 @@ import { ToastContainer, toast } from "react-toastify";
 import { AuthContext } from "../../../../../App";
 
 const AdminLogin = () => {
-  console.log("aaaa");
   const devTunnelUrl = import.meta.env.VITE_DEV_TUNNEL_URL;
 
   const [email, setEmail] = useState("");
@@ -23,7 +22,6 @@ const AdminLogin = () => {
 
   const handleLoginClick = async () => {
     try {
-      console.log("inisde login");
       setIsLoading(true);
       const response = await fetch(`${devTunnelUrl}admin_login`, {
         method: "POST",
@@ -34,23 +32,17 @@ const AdminLogin = () => {
       });
 
       const data = await response.json();
-      console.log("🚀 ~ handleLoginClick ~ data:", data);
-      console.log("🚀 ~ handleLoginClick ~ data:", data.status, data.token);
       setIsLoading(false);
 
       if (data.status && data.token) {
         toast.success("Login successful.");
         const encryptedCookie = btoa(data.token);
-        console.log(
-          "🚀 ~ handleLoginClick ~ encryptedCookie:",
-          encryptedCookie
-        );
         localStorage.setItem("userRole", data.data.role);
 
         localStorage.setItem("authCookie", encryptedCookie);
         handleLogin(data.data.role);
         setTimeout(() => navigate("/admin/users"), 1000);
-        console.log("Aaaab");
+        
       } else {
         toast.error(data.message || "Invalid Credentials.");
       }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Input from "../Input/Input";
 import DropDown from "../DropDown/DropDown";
 import HomeParagraph from "../Paragraphs/HomeParagraph";
+import { duration } from "@mui/material";
 
 const Div2 = ({
   budget,
@@ -12,8 +13,10 @@ const Div2 = ({
   setDurations,
   budgets,
   setBudgets,
- selectedCopies,
- setSelectedCopies
+  selectedCopies,
+  setSelectedCopies,
+  fields,
+  setValidatesCopies,
   // errors
 }) => {
   const copies = [
@@ -24,15 +27,28 @@ const Div2 = ({
 
   const [errors, setErrors] = useState({});
   const [defualtError, setDefualtError] = useState(false);
+  const [isBugdetPercentageValid, setIsBudgetPercentageValid] = useState(false);
+  const [isDurationValid, setIsDurationValid] = useState(false);
+  useEffect(()=>{
+
+if (fields.no_of_copies && Object.keys(fields.no_of_copies).length > 0) {
+ console.log("Change in fields")
+  setSelectedCopies(Object.keys(fields.no_of_copies).length)
+  setDurations(Object.values(fields.no_of_copies).map((item)=>item.Duration))
+  setBudgets(Object.values(fields.no_of_copies).map((item)=>item.budget))
+  setIsBudgetPercentageValid(true)
+  setIsDurationValid(true)
+};
+
+  },[fields])
   const handleBudgetChange = (e) => {
     setDefualtError(true);
     const value = e.target.value;
-   
-     setBudget(value);
-  };
 
+    setBudget(value);
+  };
+  console.log("Fields", fields.no_of_copies);
   useEffect(() => {
-   
     if (
       durations.length === budgets.length &&
       budgets.length === selectedCopies
@@ -45,12 +61,14 @@ const Div2 = ({
         };
       }
       setNoOfCopies(noOfCopies);
-    } 
+    }
 
     // Check if budget and selectedCopies are not empty, then enable the button
   }, [durations, selectedCopies, budgets]);
 
   const handleDurationChange = (index, value) => {
+    if (!value) setIsDurationValid(false);
+
     const newDurations = [...durations];
     newDurations[index] = value;
     setDurations(newDurations);
@@ -68,11 +86,14 @@ const Div2 = ({
     let durationError = "";
     if (value <= 0) {
       durationError = "Duration must be greater than 0 seconds";
+      setIsDurationValid(false);
     } else if (value > 120) {
       durationError = "Duration must not exceed 120 seconds";
+      setIsDurationValid(false);
     }
     const newErrors = { ...errors, [`duration${index}`]: durationError };
     setErrors(newErrors);
+    setIsDurationValid(true);
   };
 
   const validateBudgetPercentage = (index, value) => {
@@ -84,25 +105,41 @@ const Div2 = ({
 
   const validateTotalBudgetPercentage = () => {
     const total = budgets.reduce((acc, curr) => acc + parseFloat(curr || 0), 0);
+    console.log("🚀 ~ validateTotalBudgetPercentage ~ total:", total)
     if (total !== 100) {
       setErrors((prevErrors) => ({
         ...prevErrors,
         totalBudget: "Total budget percentages must equal 100%",
       }));
+      setIsBudgetPercentageValid(false);
     } else {
       setErrors((prevErrors) => {
         const { totalBudget, ...rest } = prevErrors;
         return rest;
       });
+      setIsBudgetPercentageValid(true);
     }
   };
 
   useEffect(() => {
     validateTotalBudgetPercentage();
   }, [budgets]);
+
+  useEffect(() => {
+    setValidatesCopies(isBugdetPercentageValid && isDurationValid);
+  }, [isBugdetPercentageValid, isDurationValid]);
+
   const handleCopiesChange = (e) => {
     const value = parseInt(e.target.value, 10);
+    console.log("🚀 ~ handleCopiesChange ~ value:", value, selectedCopies);
     setSelectedCopies(value);
+    const slicedCopies = Object.values(fields.no_of_copies).slice(
+      0,
+      e.target.value
+    );
+
+    setDurations(slicedCopies.map((item) => item.Duration));
+    setBudgets(slicedCopies.map((item) => item.budget));
     setErrors({});
   };
   return (
@@ -114,7 +151,7 @@ const Div2 = ({
           </label>
           <Input
             text="Enter amount between 50K to 500M"
-            value={budget}
+            value={budget || fields.budget}
             onChange={handleBudgetChange}
             // onClick ={()=>handleOnbudgetClick()}
           />
@@ -140,7 +177,10 @@ const Div2 = ({
                 <HomeParagraph text="Budget%" />
               </div>
             </div>
-            {Array.from({ length: selectedCopies }).map((_, index) => (
+            {Array.from({ length: selectedCopies }).map((_, index) => 
+             {console.log("aaaa",durations)
+              return(
+            
               <div key={index} className="flex items-center justify-between">
                 <div className="text-[#282828] font-poppins text-m lg:text-ll">
                   Copy {index + 1}
@@ -176,12 +216,13 @@ const Div2 = ({
                   )}
                 </div>
               </div>
-            ))}
+            )})}
             {errors.totalBudget && (
               <span className="text-red-500">{errors.totalBudget}</span>
             )}
           </div>
         )}
+  
       </div>
     </div>
   );

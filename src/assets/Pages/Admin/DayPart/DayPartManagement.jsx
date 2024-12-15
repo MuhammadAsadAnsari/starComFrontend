@@ -44,7 +44,6 @@ const [dayPartType,setDayPartType] = useState("")
 
     if (response.ok) {
         const data = await response.json();
-        console.log("🚀 ~ fetchDeviation ~ data:", data)
      setDeviationId(data.data[0].id);
      setPointValueId(data.data[1].id);
 

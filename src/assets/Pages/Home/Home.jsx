@@ -20,10 +20,10 @@ const Home = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [budgetError, setBudgetError] = useState("");
-  const [displayError, setDisplayError] = useState(false);
+ const user_data = JSON.parse(sessionStorage.getItem("user_data"));
 
-  const [fields, setFields] = useState({});
-  const [user_data, setUserData] = useState({});
+  const [fields, setFields] = useState(user_data || {});
+
 
   const [data, setdate] = useState(["", ""]);
   const [noOfCopies, setNoOfCopies] = useState({});
@@ -39,11 +39,12 @@ const Home = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [durations, setDurations] = useState([]);
   const [budgets, setBudgets] = useState([]);
+  const [validateCopies, setValidatesCopies] =useState(false)
   const role = localStorage.getItem("userRole");
 
 
+  let validatebudget = !fields.budget;
   useEffect(() => {
-    let validatebudget = true;
     if (!budget) {
       setBudgetError("Budget is required");
     } else if (budget < 50000 || budget > 500000000) {
@@ -62,8 +63,13 @@ const Home = () => {
       ([key, value]) => validateField(key, value, false)
     );
     setIsButtonDisabled(
-      !areDayPartFieldsValid || !areGenreSplitFieldsValid || validatebudget
+      !areDayPartFieldsValid || !areGenreSplitFieldsValid || validatebudget || !validateCopies
     );
+      console.log("🚀 ~ useEffect ~ validateCopies:", !validateCopies)
+      console.log("🚀 ~ useEffect ~ validatebudget:", validatebudget)
+      console.log("🚀 ~ useEffect ~ areGenreSplitFieldsValid:", !areGenreSplitFieldsValid)
+      console.log("🚀 ~ useEffect ~ areDayPartFieldsValid:", !areDayPartFieldsValid)
+    
   }, [
     grpTarget,
     dayParts,
@@ -73,6 +79,7 @@ const Home = () => {
     durations,
     selectedCopies,
     noOfCopies,
+    validateCopies,validatebudget
   ]);
   const fetchDayPartsTypes = async () => {
     try {
@@ -84,16 +91,13 @@ const Home = () => {
         },
       });
       const dayPartEnumData = await dayPartReponse.json();
-      console.log(
-        "🚀 ~ fetchDayPartsTypes ~ dayPartEnumData:",
-        dayPartEnumData
-      );
+   
 
       if (!dayPartReponse.ok)
         return toast.error(data.message || "Failed to fetch day parts.");
       setDayPartEnum(dayPartEnumData.dropdown);
       const daypartSplit = dayPartEnumData.dropdown.reduce((acc, item) => {
-        acc[item.name.toLowerCase()] = "";
+        acc[item.name.toLowerCase()] =fields?.day_part? fields?.day_part[item.name.toLowerCase()]:"";
         return acc;
       }, {});
       setDayParts(daypartSplit);
@@ -102,29 +106,17 @@ const Home = () => {
     }
   };
   useEffect(() => {
-    if (Object.keys(fields).length > 0){console.log("fields",fields)
+    if (Object.keys(fields).length > 0){
        fetchDayPartsTypes()};
+    if(fields?.budget) setBudget(budget)
+  
   }, [fields]);
 
   let isValid = true;
   const validateField = (field, value, showErrors = true) => {
     let newErrors = { ...errors };
 
-    // Validate GRP Target
-    if (field === "grpTarget") {
-      if (!value) {
-        if (showErrors) newErrors.grpTarget = "GRP Target is required";
-        isValid = false;
-      } else if (isNaN(value) || value < 0) {
-        if (showErrors)
-          newErrors.grpTarget = "GRP Target must be greater than or equal to 0";
-        isValid = false;
-      } else {
-        delete newErrors.grpTarget;
-      }
-    }
-
-    // Validate Day Parts
+  
     if (field in dayParts) {
       if (!value) {
         if (showErrors) newErrors[field] = `${field} is required`;
@@ -220,7 +212,6 @@ const handleSubmit = async () => {
     };
 
     const formData = new FormData();
-    console.log("fields.input_file", fields.input_file);
     formData.append("user_data", JSON.stringify(newfields));
     formData.append("input_file", fields.input_file);
 
@@ -231,7 +222,6 @@ const handleSubmit = async () => {
     try {
       // Store input_file and rate_file in sessionStorage as Base64
     
-    console.log("🚀 ~ handleSubmit ~ formData:", formData);
 
       const response = await fetch(`${devTunnelUrl}generate-ratings-report`, {
         method: "POST",
@@ -241,19 +231,17 @@ const handleSubmit = async () => {
         body: formData,
       });
 
-      if (response.ok) {
+      if (!response.ok) 
+        toast.error("Error creating summary:", response.message);
+
         const data = await response.json();
-        console.log("🚀 ~ handleSubmit ~ data:", data)
         sessionStorage.setItem("data", JSON.stringify(data));
         sessionStorage.setItem("user_data", JSON.stringify(newfields));
 
         navigate('/summary');
-      } else {
-        console.error("Error creating summary:", response.message);
-      }
+      
     } catch (error) {
-      console.error("Error submitting data:", error);
-      setDisplayError(true);
+        toast.error("Error creating summary:", response.message);
     } finally {
       setIsLoading(false);
     }
@@ -265,7 +253,7 @@ const handleSubmit = async () => {
 
   return (
     <div className='flex flex-col md:flex-row w-full h-screen bg-cover bg-center bg-no-repeat bg-[url("https://i.ibb.co/S69yyvw/thumbnail.jpg")]'>
-      <SideNav />
+      <SideNav setFields={setFields} />
       <ToastContainer autoClose={2000} position="top-center" />
       {isLoading && (
         <div className="absolute inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
@@ -353,6 +341,8 @@ const handleSubmit = async () => {
                 setBudgets={setBudgets}
                 selectedCopies={selectedCopies}
                 setSelectedCopies={setSelectedCopies}
+                fields ={fields}
+                setValidatesCopies ={setValidatesCopies}
               />
               <Div3
                 genreSplitFields={genreSplitFields}
@@ -389,7 +379,7 @@ const handleSubmit = async () => {
               <div className="flex flex-col basis-[65%] ">
                 <div className="flex flex-col basis-[10%] gap-[1%] pr-[1%] md:pr-0 md:gap-[6%] lg:flex-row"></div>
                 <div className="flex flex-col basis-[42%] justify-center">
-                  <div className="flex flex-col mb-[1%] w-2/3 lg:w-full lg:pr-[26%] xxl:pr-[28%] 2xl:pr-[27%] 3xl:pr-[25%]">
+                  {/* <div className="flex flex-col mb-[1%] w-2/3 lg:w-full lg:pr-[26%] xxl:pr-[28%] 2xl:pr-[27%] 3xl:pr-[25%]">
                     <label className="text-[#282828] text-s font-poppins ss:text-lg">
                       GRP Target
                     </label>
@@ -403,13 +393,15 @@ const handleSubmit = async () => {
                     {errors.grpTarget && (
                       <p className="text-red-500 mt-1">{errors.grpTarget}</p>
                     )}
-                  </div>
+                  </div> */}
                   <HomeParagraph text="Day Part" />
                   {dayPartEnum.map((part) => (
                     <GenreSplitField
                       key={part.id}
                       text={part.name}
-                      value={dayParts[part.id]}
+                      value={
+                        dayParts[part.id] || dayParts[part.name.toLowerCase()]
+                      }
                       onChange={(e) =>
                         handleInputChange(
                           part.name.toLowerCase(),
@@ -430,11 +422,7 @@ const handleSubmit = async () => {
                   onClick={handleSubmit}
                   disabled={isButtonDisabled}
                 />
-                {displayError && (
-                  <div className="text-red-500 mt-4">
-                    An error occurred while uploading files.
-                  </div>
-                )}
+              
                 <div className="basis-[20%]"></div>
               </div>
             </>
