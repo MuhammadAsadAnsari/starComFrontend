@@ -270,10 +270,7 @@ const ClientAndBrandManagement = () => {
           </form>
         </div>
 
-        <div
-          className="overflow-y-auto "
-          style={{ maxHeight: "calc(100vh - 200px)" }}
-        >
+      
           <DataTable
             headers={["CLIENTS", "BRANDS", "ACTIONS"]}
             data={clients}
@@ -284,7 +281,6 @@ const ClientAndBrandManagement = () => {
             openModal={openModal}
             openAlert={openAlert}
           />
-        </div>
 
         <Pagination
           currentPage={currentPage}

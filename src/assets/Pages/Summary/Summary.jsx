@@ -10,13 +10,13 @@ const Summary = () => {
   const [isDownloaded, setIsDownloaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const sampleData = JSON.parse(sessionStorage.getItem("data"));
+  const sampleData = JSON.parse(localStorage.getItem("data"));
   const devTunnelUrl = import.meta.env.VITE_DEV_TUNNEL_URL;
   const encryptedToken = localStorage.getItem("authCookie");
   const authToken = atob(encryptedToken);
-  const data = JSON.parse(sessionStorage.getItem("data"));
+  const data = JSON.parse(localStorage.getItem("data"));
 
-  let user_data = JSON.parse(sessionStorage.getItem("user_data"));
+  let user_data = JSON.parse(localStorage.getItem("user_data"));
   const rateType = user_data.select;
 
   user_data = {
@@ -30,7 +30,6 @@ const Summary = () => {
     select: user_data.select,
     download: true,
   };
-  console.log("🚀 ~ Summary ~ user_data:", user_data);
 
   const formData = new FormData();
 
@@ -54,12 +53,9 @@ const Summary = () => {
         return response.arrayBuffer();
       })
       .then((buffer) => {
-        console.log("Buffer data:", buffer);
 
         const blob = new Blob([buffer]);
-        console.log("🚀 ~ .then ~ blob:", blob);
         const url = URL.createObjectURL(blob);
-        console.log("🚀 ~ .then ~ url:", url);
 
         // Create a download link (for example)
         const a = document.createElement("a");
@@ -86,7 +82,6 @@ const Summary = () => {
         ...(data.rate_file_key && { rate_file_key: data.rate_file_key }),
       },
     });
-    console.log("Resp",response)
     navigate("/")
   };
   return (
@@ -166,7 +161,7 @@ const Summary = () => {
                 </tbody>
               </table>
             </div>
-            {/* <Button text="Back" styling="px-6" onClick={handleChanges} /> */}
+            <Button text="Back" styling="px-6" onClick={handleChanges} />
           </div>
           {/* Right Section (Day Part and Genre Tables) */}
           <div className="space-y-6">

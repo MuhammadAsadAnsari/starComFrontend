@@ -53,9 +53,7 @@ const GenreManagement = () => {
       });
 
       const data = await response.json();
-      console.log("🚀 ~ fetchGenres ~ data:", data.total);
       const genreEnumData = await genreResponse.json();
-      console.log("🚀 ~ fetchGenres ~ genreEnumData:", genreEnumData)
 
       if (!response.ok || genreResponse.ok) {
         setGenres(
@@ -64,7 +62,6 @@ const GenreManagement = () => {
             genre_id: item.genre_id, // Ensure genre_id is available
           }))
         );
-        console.log("genreDataEnum",genreEnumData.genre_options)
         setGenreEnum(genreEnumData.genre_options);
         setTotalRecords(data.total);
       } else {
@@ -82,15 +79,12 @@ const GenreManagement = () => {
 
 
   const openAlert = (type, Id, active) => {
-    console.log("🚀 ~ openAlert ~ item:", active, Id);
     setActive(active);
     setChannelId(Id);
     setOpenDeleteModel(true);
   };
   // Open modal for adding or editing
   const openModal = (type, genre = null) => {
-    console.log("🚀 ~ openModal ~ type:", type)
-    console.log(genre);
     setIsModalOpen(true);
     setIsEditMode(!!genre);
     setSelectedGenre(genre);
@@ -110,7 +104,6 @@ const GenreManagement = () => {
   // Add new genre
   const addGenre = async () => {
     try {
-      console.log("new channel",newChannel,newGenre);
       const response = await fetch(`${devTunnelUrl}add_channel`, {
         method: "POST",
         headers: {
@@ -137,14 +130,6 @@ const GenreManagement = () => {
   // Update existing genre
   const updateGenre = async () => {
     try {
-      console.log("active",active)
-      console.log("new Genre", newGenre, selectedGenre, channelId);
-      console.log(
-        "🚀 ~ updateGenre ~ selectedGenre:",
-        newChannel,
-        selectedGenre,
-    
-      );
 
       // return
       const response = await fetch(
@@ -207,17 +192,13 @@ const GenreManagement = () => {
         </div>
 
         {/* Genre Table */}
-        <div
-          className="overflow-y-auto"
-          style={{ maxHeight: "calc(100vh - 200px)" }}
-        >
+      
           <DataTable
             headers={["CHANNEL", "GENRE", "ACTIONS"]}
             data={genres}
             openModal={openModal}
             openAlert={openAlert}
           />
-        </div>
 
         {/* Pagination Controls */}
         <Pagination

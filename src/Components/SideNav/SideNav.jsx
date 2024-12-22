@@ -32,9 +32,13 @@ const SideNav = ({setFields}) => {
                 stroke={"#F58220"}
                 className="w-6 h-6 cursor-pointer"
                 onClick={() => {
-                  navigate("/");
                   setFields({})
-                  sessionStorage.clear();
+                  localStorage.removeItem('user_data');
+                  localStorage.removeItem("data");
+
+                  navigate("/");
+                      window.location.reload(true);
+
                 }}
               >
                 <path
