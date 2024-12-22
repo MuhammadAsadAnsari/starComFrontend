@@ -8,6 +8,7 @@ import AdminSideNav from "../../../../Components/SideNav/AdminSideNav";
 import EnumDropDown from "../../../../Components/DropDown/EnumDropDown";
 import AddButton from "../../../../Components/buttons/AddButton";
 import CheckIcon from "@mui/icons-material/Check";
+import AdminInput from "../../../../Components/Input/AdminInput";
 const DayPartManagement = () => {
   const devTunnelUrl = import.meta.env.VITE_DEV_TUNNEL_URL;
   const encryptedToken = localStorage.getItem("authCookie");
@@ -44,7 +45,6 @@ const [dayPartType,setDayPartType] = useState("")
 
     if (response.ok) {
         const data = await response.json();
-        console.log("🚀 ~ fetchDeviation ~ data:", data)
      setDeviationId(data.data[0].id);
      setPointValueId(data.data[1].id);
 
@@ -80,7 +80,6 @@ const [dayPartType,setDayPartType] = useState("")
 
       const data = await response.json();
       const dayPartEnumData = await dayPartReponse.json();
-      console.log("🚀 ~ fetchDayParts ~ dayPartEnumData:", dayPartEnumData);
 
       if (response.ok && dayPartReponse.ok) {
         setTimeSlots(data.data);
@@ -104,7 +103,6 @@ fetchDeviation();
 
 const addDayPartTpye = async()=>{
    try {
-    console.log("DayParts added",dayPartType)
     
      const response = await fetch(`${devTunnelUrl}add_daypart_type`, {
        method: "POST",
@@ -145,7 +143,6 @@ const addDayPartTpye = async()=>{
 
   const handleUpdate = async () => {
     try {
-      console.log("��� ~ handleUpdate ~ updatedDayPart:", updatedDayPart);
       const response = await fetch(
         `${devTunnelUrl}update_daypart/${selectedSlot.id}`,
         {
@@ -181,8 +178,7 @@ const addDayPartTpye = async()=>{
       toast.error("An error occurred while updating the day part.");
     }
   };
-  const handleDeviation = async(type)=>{
-    console.log("Deviation clicked",typeof deviation,deviationId,type)
+  const handleValue = async(type)=>{
     const id = type == "Standard Deviation" ? deviationId: pointValueId;
     const value = type == "Standard Deviation" ? parseFloat(deviation): parseFloat(pointValue)
     try {
@@ -219,45 +215,34 @@ const addDayPartTpye = async()=>{
       <div className="p-6 min-h-screen text-gray-800 bg-white basis-[95%]">
         <ToastNotification />
         <div className="flex justify-between mb-6 space-x-4 align-middle">
-          <div className="relative w-1/3">
-            <input
-              type="text"
-              value={deviation}
-              onChange={(event) => setDeviation(event.target.value)}
-              className="w-2/3 p-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <CheckIcon
-              className="absolute top-4 right-44 text-gray-500"
-              onClick={() => handleDeviation("Standard Deviation")}
-            />
-          </div>
-          <div className="relative w-1/3">
-            <input
-              type="text"
-              value={pointValue}
-              onChange={(event) => setPointValue(event.target.value)}
-              className="w-2/3 p-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <CheckIcon
-              className="absolute top-4 right-44 text-gray-500"
-              onClick={() => handleDeviation("Threshold")}
-            />
-          </div>
+          <AdminInput
+            text="STD Value: "
+            value={deviation}
+            setValue={setDeviation}
+            handleValue={handleValue}
+            type="Standard Deviation"
+          />
+          <AdminInput
+            text="Point Value: "
+            value={pointValue}
+            setValue={setPointValue}
+            handleValue={handleValue}
+            type="Threshold"
+          />
+
+       
           <div className="w-1/3">
             <AddButton openModal={openModal} text="Add Day Part" />
           </div>
         </div>
 
-        <div
-          className="overflow-y-auto"
-          style={{ maxHeight: "calc(100vh - 200px)" }}
-        >
+      
           <DataTable
             headers={["TIMINGS", "DAY PART"]}
             data={timeSlots}
             openModal={openModal}
           />
-        </div>
+
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

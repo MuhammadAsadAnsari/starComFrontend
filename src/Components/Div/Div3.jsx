@@ -11,6 +11,7 @@ const Div3 = ({
   setGenreSplitFields,
   fields
 }) => {
+  
   const devTunnelUrl = import.meta.env.VITE_DEV_TUNNEL_URL;
   const encryptedToken = localStorage.getItem("authCookie");
   const authToken = atob(encryptedToken);
@@ -29,8 +30,8 @@ const Div3 = ({
     setGenreEnum(genreEnumData.genre_options);
 
 const genreSplit = genreEnumData.genre_options.reduce((acc, item) => {
-
-  acc[item.name.toLowerCase()] = "";
+  acc[item.name.toLowerCase()] =
+    fields?.genre ?fields?.genre[item?.name?.toLowerCase()] : "";
   return acc;
 }, {});
   setGenreSplitFields(genreSplit);
@@ -47,17 +48,22 @@ const genreSplit = genreEnumData.genre_options.reduce((acc, item) => {
         <HomeParagraph text="Genre Split" styling="pl-[10%]" />
       </div>
       <div className="flex flex-col basis-[40%]  justify-center pl-[10%]">
-        {genreEnum.map((genre) => (
-          <GenreSplitField
-            key={genre.id}
-            text={genre.name}
-            value={genreSplitFields[genre.id]}
-            onChange={(e) =>
-              handleInputChange(genre.name.toLowerCase(), e.target.value)
-            }
-            error={errors[genre.name.toLowerCase()]}
-          />
-        ))}
+        {genreEnum.map((genre) => {
+          
+          return (
+            <GenreSplitField
+              key={genre.id}
+              text={genre.name}
+              value={
+                genreSplitFields[genre.id] ||
+                genreSplitFields[genre.name.toLowerCase()]
+              }
+              onChange={(e) =>
+                handleInputChange(genre.name.toLowerCase(), e.target.value)
+              }
+              error={errors[genre.name.toLowerCase()]}
+            />
+          );})}
         {errors.totalGenreSplit && (
           <p className="text-red-500 mt-1">{errors.totalGenreSplit}</p>
         )}

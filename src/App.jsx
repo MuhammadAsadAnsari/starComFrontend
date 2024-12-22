@@ -105,10 +105,7 @@ const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(
     !!localStorage.getItem("authCookie")
   );
-  console.log(
-    "localStorage.getItem('userRole')",
-    localStorage.getItem("userRole")
-  );
+
   const [role, setRole] = useState(localStorage.getItem("userRole") || null);
   const location = useLocation();
 
@@ -117,7 +114,6 @@ const AuthProvider = ({ children }) => {
   }, [location.pathname]);
 
   const handleLogin = (role) => {
-    console.log("🚀 ~ handleLogin ~ role:", role);
     setIsAuthenticated(true);
     setRole(role);
   };
@@ -140,7 +136,6 @@ const AuthProvider = ({ children }) => {
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { isAuthenticated, role } = useContext(AuthContext);
-  console.log("🚀 ~ ProtectedRoute ~ role:", role);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" />;

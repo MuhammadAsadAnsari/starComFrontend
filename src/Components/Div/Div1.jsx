@@ -21,7 +21,7 @@ const Div1 = ({ setFields }) => {
 
   const startDateRef = useRef(null);
   const endDateRef = useRef(null);
-let fileRateInputRef = useRef(null);
+  let fileRateInputRef = useRef(null);
   const fileRatingInputRef = useRef(null);
 
   const [ratingFileName, setRatingFileName] = useState("Upload Rating File");
@@ -149,7 +149,7 @@ let fileRateInputRef = useRef(null);
         ...(rate === "uploadRateFile" && rateFile
           ? { rate_file: rateFile }
           : {}),
-            select: rate ||"",
+        select: rate || "",
         dates: {
           Start_Date: formatDate(startDate),
           End_Date: formatDate(endDate),
@@ -177,7 +177,6 @@ let fileRateInputRef = useRef(null);
       console.log("🚀 ~ handleClientChange ~ response:", response);
       if (response.status == 404) {
         toast.error("No Data found for client");
-        setNewClient(null);
         return;
       } else if (!response.ok) return toast.error("Failed to get client rates");
     } catch (error) {
@@ -189,6 +188,7 @@ let fileRateInputRef = useRef(null);
       setRateFileName("Upload Rate File");
       fileRateInputRef = null;
     }
+    console.log("🚀 ~ useEffect ~ rate:", rate)
   }, [rate]);
 
   const isContinueDisabled = !(
@@ -196,7 +196,8 @@ let fileRateInputRef = useRef(null);
     newBrand &&
     startDate &&
     endDate &&
-    ratingFile
+    ratingFile &&
+    ((rate === "uploadRateFile" && rateFile) || rate !== "uploadRateFile")
   );
   return (
     <div className="flex flex-col pl-[10%] pr-[6%] py-[2%] basis-[60%] md:py-0 ">

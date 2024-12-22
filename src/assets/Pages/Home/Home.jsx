@@ -20,17 +20,17 @@ const Home = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [budgetError, setBudgetError] = useState("");
-  const [displayError, setDisplayError] = useState(false);
+  const user_data = JSON.parse(localStorage.getItem("user_data"));
+  const fileData = JSON.parse(localStorage.getItem("data"));
 
-  const [fields, setFields] = useState({});
-  const [user_data, setUserData] = useState({});
 
-  const [data, setdate] = useState(["", ""]);
+  const [fields, setFields] = useState(user_data || {});
+
   const [noOfCopies, setNoOfCopies] = useState({});
   const [dayPartEnum, setDayPartEnum] = useState([]);
 
   const [grpTarget, setGrpTarget] = useState("");
-  const [budget, setBudget] = useState("");
+  const [budget, setBudget] = useState();
   const [selectedCopies, setSelectedCopies] = useState();
 
   const [dayParts, setDayParts] = useState({});
@@ -39,11 +39,11 @@ const Home = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [durations, setDurations] = useState([]);
   const [budgets, setBudgets] = useState([]);
+  const [validateCopies, setValidatesCopies] = useState(false);
   const role = localStorage.getItem("userRole");
 
-
+  let validatebudget = !fields.budget;
   useEffect(() => {
-    let validatebudget = true;
     if (!budget) {
       setBudgetError("Budget is required");
     } else if (budget < 50000 || budget > 500000000) {
@@ -62,7 +62,10 @@ const Home = () => {
       ([key, value]) => validateField(key, value, false)
     );
     setIsButtonDisabled(
-      !areDayPartFieldsValid || !areGenreSplitFieldsValid || validatebudget
+      !areDayPartFieldsValid ||
+        !areGenreSplitFieldsValid ||
+        validatebudget ||
+        !validateCopies
     );
   }, [
     grpTarget,
@@ -73,6 +76,8 @@ const Home = () => {
     durations,
     selectedCopies,
     noOfCopies,
+    validateCopies,
+    validatebudget,
   ]);
   const fetchDayPartsTypes = async () => {
     try {
@@ -84,16 +89,14 @@ const Home = () => {
         },
       });
       const dayPartEnumData = await dayPartReponse.json();
-      console.log(
-        "🚀 ~ fetchDayPartsTypes ~ dayPartEnumData:",
-        dayPartEnumData
-      );
 
       if (!dayPartReponse.ok)
         return toast.error(data.message || "Failed to fetch day parts.");
       setDayPartEnum(dayPartEnumData.dropdown);
       const daypartSplit = dayPartEnumData.dropdown.reduce((acc, item) => {
-        acc[item.name.toLowerCase()] = "";
+        acc[item.name.toLowerCase()] = fields?.day_part
+          ? fields?.day_part[item.name.toLowerCase()]
+          : "";
         return acc;
       }, {});
       setDayParts(daypartSplit);
@@ -102,29 +105,16 @@ const Home = () => {
     }
   };
   useEffect(() => {
-    if (Object.keys(fields).length > 0){console.log("fields",fields)
-       fetchDayPartsTypes()};
+    if (Object.keys(fields).length > 0) {
+      fetchDayPartsTypes();
+    }
+    if (fields?.budget) setBudget(budget);
   }, [fields]);
 
   let isValid = true;
   const validateField = (field, value, showErrors = true) => {
     let newErrors = { ...errors };
 
-    // Validate GRP Target
-    if (field === "grpTarget") {
-      if (!value) {
-        if (showErrors) newErrors.grpTarget = "GRP Target is required";
-        isValid = false;
-      } else if (isNaN(value) || value < 0) {
-        if (showErrors)
-          newErrors.grpTarget = "GRP Target must be greater than or equal to 0";
-        isValid = false;
-      } else {
-        delete newErrors.grpTarget;
-      }
-    }
-
-    // Validate Day Parts
     if (field in dayParts) {
       if (!value) {
         if (showErrors) newErrors[field] = `${field} is required`;
@@ -202,70 +192,68 @@ const Home = () => {
     validateField(field, value);
   };
 
+  const handleSubmit = async () => {
+    if (!fields?.input_file && !fileData?.user_data_key)
+      return toast.error("Rating file is required. ");
+    if (isValid) {
+      setIsLoading(true);
 
-const handleSubmit = async () => {
-  if (isValid) {
-    setIsLoading(true);
+      const newfields = {
+        brand_id: fields.brand_id,
+        client_id: fields.client_id,
+        select: fields.select,
+        dates: fields.dates,
+        budget: parseInt(budget),
+        no_of_copies: noOfCopies,
+        day_part: dayParts,
+        genre: genreSplitFields,
+        download: false,
+      };
 
-    const newfields = {
-      brand_id: fields.brand_id,
-      client_id: fields.client_id,
-      select: fields.select,
-      dates: fields.dates,
-      budget: parseInt(budget),
-      no_of_copies: noOfCopies,
-      day_part: dayParts,
-      genre: genreSplitFields,
-      download: false,
-    };
+      // return
+      const formData = new FormData();
+      formData.append("user_data", JSON.stringify(newfields));
 
-    const formData = new FormData();
-    console.log("fields.input_file", fields.input_file);
-    formData.append("user_data", JSON.stringify(newfields));
-    formData.append("input_file", fields.input_file);
+      if (fields?.input_file) formData.append("input_file", fields.input_file);
 
-    if (fields.rate_file) formData.append("rate_file", fields.rate_file);
-
+      if (fields?.rate_file) formData.append("rate_file", fields.rate_file);
     
-
-    try {
-      // Store input_file and rate_file in sessionStorage as Base64
+      if (fileData?.user_data_key)
+        formData.append("user_data_key", fileData.user_data_key);
     
-    console.log("🚀 ~ handleSubmit ~ formData:", formData);
+      if (fileData?.rate_file_key)
+          formData.append("rate_file_key", fileData.rate_file_key);
 
-      const response = await fetch(`${devTunnelUrl}generate-ratings-report`, {
-        method: "POST",
-        headers: {
-          Authorization: `${authToken}`,
-        },
-        body: formData,
-      });
+      try {
+        // Store input_file and rate_file in local as Base64
 
-      if (response.ok) {
+        const response = await fetch(`${devTunnelUrl}generate-ratings-report`, {
+          method: "POST",
+          headers: {
+            Authorization: `${authToken}`,
+          },
+          body: formData,
+        });
+        if (!response.ok)
+          return toast.error("Error creating summary:", response.message);
+
         const data = await response.json();
-        console.log("🚀 ~ handleSubmit ~ data:", data)
-        sessionStorage.setItem("data", JSON.stringify(data));
-        sessionStorage.setItem("user_data", JSON.stringify(newfields));
+
+        localStorage.setItem("data", JSON.stringify(data));
+        localStorage.setItem("user_data", JSON.stringify(newfields));
 
         navigate('/summary');
-      } else {
-        console.error("Error creating summary:", response.message);
+      } catch (error) {
+        toast.error(response.message);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error submitting data:", error);
-      setDisplayError(true);
-    } finally {
-      setIsLoading(false);
     }
-  }
-
-
-};
-
+  };
 
   return (
     <div className='flex flex-col md:flex-row w-full h-screen bg-cover bg-center bg-no-repeat bg-[url("https://i.ibb.co/S69yyvw/thumbnail.jpg")]'>
-      <SideNav />
+      <SideNav setFields={setFields} />
       <ToastContainer autoClose={2000} position="top-center" />
       {isLoading && (
         <div className="absolute inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
@@ -312,34 +300,36 @@ const handleSubmit = async () => {
               Object.entries(fields).map(([key, value]) => {
                 if (key === "dates") {
                   return (
-                    <>
+                    <React.Fragment key="dates">
                       <SelectedDropDown
                         key="start_Date"
                         text={`Start Date: ${value.Start_Date}`}
                         styling="s:mx-1 s:w-[25%] s:justify-between"
                       />
                       <SelectedDropDown
-                        key="End_Date"
+                        key="end_Date"
                         text={`End Date: ${value.End_Date}`}
                         styling="s:mx-1 s:w-[25%] s:justify-between"
                       />
-                    </>
+                    </React.Fragment>
                   );
                 } else if (
-                  key == "client_id" ||
-                  key == "brand_id" ||
-                  key == "select"
+                  key === "client_id" ||
+                  key === "brand_id" ||
+                  key === "select"
                 ) {
                   return (
                     <SelectedDropDown
-                      key={key}
+                      key={key} // Ensures unique key for each item
                       text={value}
                       styling="s:mx-1 s:w-[25%] s:justify-between"
                     />
                   );
                 }
+                return null; // Ensures no warnings for unmatched cases
               })}
           </div>
+
           {Object.keys(fields).length > 0 ? (
             <>
               <Div2
@@ -353,6 +343,8 @@ const handleSubmit = async () => {
                 setBudgets={setBudgets}
                 selectedCopies={selectedCopies}
                 setSelectedCopies={setSelectedCopies}
+                fields={fields}
+                setValidatesCopies={setValidatesCopies}
               />
               <Div3
                 genreSplitFields={genreSplitFields}
@@ -363,7 +355,7 @@ const handleSubmit = async () => {
               />
             </>
           ) : (
-            <Div1 setFields={setFields} setdate={setdate} />
+            <Div1 setFields={setFields} />
           )}
         </div>
         <div
@@ -389,7 +381,7 @@ const handleSubmit = async () => {
               <div className="flex flex-col basis-[65%] ">
                 <div className="flex flex-col basis-[10%] gap-[1%] pr-[1%] md:pr-0 md:gap-[6%] lg:flex-row"></div>
                 <div className="flex flex-col basis-[42%] justify-center">
-                  <div className="flex flex-col mb-[1%] w-2/3 lg:w-full lg:pr-[26%] xxl:pr-[28%] 2xl:pr-[27%] 3xl:pr-[25%]">
+                  {/* <div className="flex flex-col mb-[1%] w-2/3 lg:w-full lg:pr-[26%] xxl:pr-[28%] 2xl:pr-[27%] 3xl:pr-[25%]">
                     <label className="text-[#282828] text-s font-poppins ss:text-lg">
                       GRP Target
                     </label>
@@ -403,13 +395,15 @@ const handleSubmit = async () => {
                     {errors.grpTarget && (
                       <p className="text-red-500 mt-1">{errors.grpTarget}</p>
                     )}
-                  </div>
+                  </div> */}
                   <HomeParagraph text="Day Part" />
                   {dayPartEnum.map((part) => (
                     <GenreSplitField
                       key={part.id}
                       text={part.name}
-                      value={dayParts[part.id]}
+                      value={
+                        dayParts[part.id] || dayParts[part.name.toLowerCase()]
+                      }
                       onChange={(e) =>
                         handleInputChange(
                           part.name.toLowerCase(),
@@ -430,11 +424,7 @@ const handleSubmit = async () => {
                   onClick={handleSubmit}
                   disabled={isButtonDisabled}
                 />
-                {displayError && (
-                  <div className="text-red-500 mt-4">
-                    An error occurred while uploading files.
-                  </div>
-                )}
+
                 <div className="basis-[20%]"></div>
               </div>
             </>

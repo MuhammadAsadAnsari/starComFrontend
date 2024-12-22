@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { RiFileHistoryLine } from "react-icons/ri";
 import { useNavigate, useLocation } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
-const SideNav = () => {
+const SideNav = ({setFields}) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -32,7 +32,13 @@ const SideNav = () => {
                 stroke={"#F58220"}
                 className="w-6 h-6 cursor-pointer"
                 onClick={() => {
+                  setFields({})
+                  localStorage.removeItem('user_data');
+                  localStorage.removeItem("data");
+
                   navigate("/");
+                      window.location.reload(true);
+
                 }}
               >
                 <path
