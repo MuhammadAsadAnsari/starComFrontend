@@ -11,7 +11,6 @@ const SelectedDropDown = ({text,styling}) => {
       <span className="font-poppins  text-s  text-[#53615A] py-1 px-1   3xl:text-xl 4xl:text-2xl">
         {text}
       </span>
-      <CloseIcon className="text-[#53615A] " />
     </div>
   );
 }

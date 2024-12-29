@@ -9,6 +9,7 @@ import AdminSideNav from "../../../../Components/SideNav/AdminSideNav";
 import DataTable from "../../../../Components/DataTable/DataTable";
 import { FaTimes } from "react-icons/fa";
 import EnumDropDown from "../../../../Components/DropDown/EnumDropDown";
+import FilterDropDown from "../../../../Components/DropDown/FilterDropDown";
 
 const GenreManagement = () => {
   const devTunnelUrl = import.meta.env.VITE_DEV_TUNNEL_URL;
@@ -29,12 +30,14 @@ const GenreManagement = () => {
   const limit = 20; // Number of records per page
   const [genreEnum, setGenreEnum] = useState([]);
   const [openDeleteModel, setOpenDeleteModel] = useState(false);
-
+  const [filter,setFilter]= useState("active")
   // Fetch genres from the backend with pagination and search
   const fetchGenres = async (page = 1, limit = 13) => {
     try {
+   const status =
+     filter != "all" ? (filter == "active" ? "true" : "false") : "all";
       const response = await fetch(
-        `${devTunnelUrl}/get_channels?page=${page}&limit=${limit}&search=${searchTerm}`,
+        `${devTunnelUrl}/get_channels?page=${page}&limit=${limit}&search=${searchTerm}&active=${status}`,
         {
           method: "GET",
           headers: {
@@ -75,7 +78,7 @@ const GenreManagement = () => {
 
   useEffect(() => {
     fetchGenres(currentPage, limit);
-  }, [currentPage, searchTerm]);
+  }, [currentPage, searchTerm,active,filter]);
 
 
   const openAlert = (type, Id, active) => {
@@ -192,13 +195,13 @@ const GenreManagement = () => {
         </div>
 
         {/* Genre Table */}
-      
-          <DataTable
-            headers={["CHANNEL", "GENRE", "ACTIONS"]}
-            data={genres}
-            openModal={openModal}
-            openAlert={openAlert}
-          />
+        <FilterDropDown value={filter} setValue={setFilter} />
+        <DataTable
+          headers={["CHANNEL", "GENRE", "ACTIONS"]}
+          data={genres}
+          openModal={openModal}
+          openAlert={openAlert}
+        />
 
         {/* Pagination Controls */}
         <Pagination
@@ -221,7 +224,7 @@ const GenreManagement = () => {
                 placeholder="Channel"
                 className="border border-gray-300 p-2 w-full rounded-lg mb-4"
               />
-              <EnumDropDown 
+              <EnumDropDown
                 value={newGenre}
                 setValue={setNewGenre}
                 data={genreEnum}

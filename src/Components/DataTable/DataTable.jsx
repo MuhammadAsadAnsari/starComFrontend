@@ -16,7 +16,7 @@ const DataTable = ({
     <div className="border border-gray-300 rounded-lg shadow-md">
       <div
         className="overflow-auto"
-        style={{ maxHeight: "calc(100vh - 200px)" }}
+        style={{ maxHeight: "calc(100vh - 280px)" }}
       >
         <table
           className="min-w-full border border-gray-300 bg-white text-gray-800 rounded-lg shadow-md overflow-hidden"
@@ -28,7 +28,7 @@ const DataTable = ({
                 <th
                   key={index}
                   className={`py-3 px-4 ${styling && styling}`}
-                  style={{ width: "25%" }} // Adjust width here
+                  // style={{ width: "25%" }} // Adjust width here
                 >
                   {header}
                 </th>
@@ -48,7 +48,7 @@ const DataTable = ({
                       className={`${styling && "p-3"} py-3 text-center`}
                       style={{
                         width: `${
-                          brandInputs && setBrandInputs ? "40%" : "30%"
+                          brandInputs && setBrandInputs ? "35%" : "30%"
                         }`,
                       }}
                     >
@@ -61,7 +61,7 @@ const DataTable = ({
                       className={`${styling && "p-3"} py-3 text-center`}
                       style={{
                         width: `${
-                          brandInputs && setBrandInputs ? "40%" : "30%"
+                          brandInputs && setBrandInputs ? "35%" : "30%"
                         }`,
                       }}
                     >
@@ -116,6 +116,67 @@ const DataTable = ({
                         {item?.role === "super_user" ? "sub Admin" : "user"}
                       </td>
                     )}
+                        {item?.role && (
+                      <td
+                        className="py-3 text-center"
+                        style={{ width: "20%", cursor: "pointer" }}
+                        onClick={(e) => e.stopPropagation()} // Prevent triggering row click
+                      >
+                          <div className="flex flex-wrap gap-2 justify-center">
+                            {/* Existing Clients */}
+                            {item.clients &&
+                              item.clients.map((client) => (
+                                <div
+                                  key={client.id}
+                                  className="flex items-center bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-medium"
+                                >
+                                  {client.name}
+                                  <button
+                                    onClick={(e) =>
+                                      handleClientDelete(item.id, client.id)
+                                    }
+                                    className="ml-2 text-red-500 hover:text-red-700"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+
+                            {/* Input for Adding New Client */}
+                            <input
+                              type="text"
+                              placeholder="Add a Client"
+                              className="border-none outline-none px-2  py-1 rounded-full text-sm w-auto bg-transparent focus:ring-2 focus:ring-red-500"
+                              onKeyDown={async (e) => {
+                                if (e.key === "Enter") {
+                                  const newClientName = e.target.value.trim();
+                                  if (!newClientName) return;
+
+                                  // Simulate API call
+                                  const response = await new Promise(
+                                    (resolve) =>
+                                      setTimeout(() => resolve("ok"), 500)
+                                  );
+
+                                  if (response === "ok") {
+                                    const newClient = {
+                                      id: Date.now(), // Simulate unique ID
+                                      name: newClientName,
+                                    };
+
+                                    const updatedClients = [
+                                      ...(item.clients || []),
+                                      newClient,
+                                    ];
+                                  }
+                                }
+                              }}
+                              onClick={(e) => e.stopPropagation()} // Prevent row click while typing
+                            />
+                          </div>
+                      </td>
+                        )}
+
                     {/* Actions */}
                     {openModal && !item?.dayPartType && (
                       <td

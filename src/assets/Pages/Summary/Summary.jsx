@@ -72,16 +72,7 @@ const Summary = () => {
       });
   };
   const handleChanges = async () => {
-    const response = await fetch(`${devTunnelUrl}delete_upload_files`, {
-      method: "POST",
-      headers: {
-        Authorization: `${authToken}`,
-      },
-      body: {
-        user_data_key: data.user_data_key,
-        ...(data.rate_file_key && { rate_file_key: data.rate_file_key }),
-      },
-    });
+   
     navigate("/")
   };
   return (
@@ -94,7 +85,7 @@ const Summary = () => {
           {/* Tailwind spinner */}
         </div>
       )}
-      <div className="p-6 space-y-6 bg-white basis-[94%] ">
+      <div className="p-6 space-y-3 bg-white basis-[94%] ">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
@@ -113,7 +104,10 @@ const Summary = () => {
         {/* Schedule Created Text */}
         <div className="flex justify-between items-center bg-yellow-100 p-2 rounded-lg">
           <p>
-            Schedule created on: <span className="font-bold">{rateType}</span>
+            Schedule created on:{" "}
+            <span className="font-bold">
+              {rateType.split("R")[0]} R{rateType.split("R")[1]}
+            </span>
           </p>
         </div>
 
@@ -121,7 +115,10 @@ const Summary = () => {
         <div className="grid grid-cols-2 gap-6">
           {/* Left Section (Channel Table) */}
           <div className="space-y-6">
-            <div className="overflow-x-auto shadow-lg rounded-lg">
+            <div
+              className="overflow-auto"
+              style={{ maxHeight: "calc(100vh - 280px)" }}
+            >
               <table className="min-w-full bg-white">
                 <thead>
                   <tr className="bg-gray-200">
@@ -166,7 +163,10 @@ const Summary = () => {
           {/* Right Section (Day Part and Genre Tables) */}
           <div className="space-y-6">
             {/* Day Part Table */}
-            <div className="overflow-x-auto shadow-lg rounded-lg">
+            <div
+              className="overflow-auto"
+              style={{ maxHeight: "calc(100vh - 400px)" }}
+            >
               <table className="min-w-full bg-white">
                 <thead>
                   <tr className="bg-gray-200">
@@ -208,7 +208,10 @@ const Summary = () => {
             </div>
 
             {/* Genre Table */}
-            <div className="overflow-x-auto shadow-lg rounded-lg">
+            <div
+              className="overflow-auto"
+              style={{ maxHeight: "calc(100vh - 400px)" }}
+            >
               <table className="min-w-full bg-white">
                 <thead>
                   <tr className="bg-gray-200">
