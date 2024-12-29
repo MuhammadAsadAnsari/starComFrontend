@@ -203,12 +203,13 @@ const Home = () => {
         client_id: fields.client_id,
         select: fields.select,
         dates: fields.dates,
-        budget: parseInt(budget),
+        budget: fields.budget,
         no_of_copies: noOfCopies,
         day_part: dayParts,
         genre: genreSplitFields,
         download: false,
       };
+      console.log("🚀 ~ handleSubmit ~ newfields:", newfields)
 
       // return
       const formData = new FormData();
@@ -225,6 +226,7 @@ const Home = () => {
           formData.append("rate_file_key", fileData.rate_file_key);
 
       try {
+        console.log("🚀 ~ handleSubmit ~ formData:", formData)
         // Store input_file and rate_file in local as Base64
 
         const response = await fetch(`${devTunnelUrl}generate-ratings-report`, {
@@ -234,6 +236,7 @@ const Home = () => {
           },
           body: formData,
         });
+        console.log("🚀 ~ handleSubmit ~ response:", response)
         if (!response.ok)
           return toast.error("Error creating summary:", response.message);
 
@@ -298,6 +301,7 @@ const Home = () => {
             />
             {Object.keys(fields).length > 0 &&
               Object.entries(fields).map(([key, value]) => {
+                console.log("🚀 ~ Object.entries ~ key:", key)
                 if (key === "dates") {
                   return (
                     <React.Fragment key="dates">
@@ -313,15 +317,19 @@ const Home = () => {
                       />
                     </React.Fragment>
                   );
-                } else if (
-                  key === "client_id" ||
-                  key === "brand_id" ||
-                  key === "select"
-                ) {
+                } else if (key == "client_id") {
+                return (
+                  <SelectedDropDown
+                    key={key} // Ensures unique key for each item
+                    text={key === "select" ? value : ""}
+                    styling="s:mx-1 s:w-[25%] s:justify-between"
+                  />
+                );
+                } else {
                   return (
                     <SelectedDropDown
                       key={key} // Ensures unique key for each item
-                      text={value}
+                      text={key === "select" ? value : ""}
                       styling="s:mx-1 s:w-[25%] s:justify-between"
                     />
                   );

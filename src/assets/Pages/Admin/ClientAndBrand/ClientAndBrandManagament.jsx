@@ -10,6 +10,7 @@ import AsyncSelect from "react-select/async";
 import axios from "axios";
 import { FaTimes } from "react-icons/fa";
 import AddButton from "../../../../Components/buttons/AddButton";
+import FilterDropDown from "../../../../Components/DropDown/FilterDropDown";
 
 const ClientAndBrandManagement = () => {
   const devTunnelUrl = import.meta.env.VITE_DEV_TUNNEL_URL;
@@ -29,6 +30,7 @@ const ClientAndBrandManagement = () => {
   const [newBrands, setNewBrands] = useState([]); // List of brands for the modal
   const [selectedOptions, setSelectedOptions] = useState([]); // Selected brands in AsyncSelect
   const [openDeleteModel, setOpenDeleteModel] = useState(false);
+  const [filter,setFilter] = useState("active");
 
   const limit = 10;
 
@@ -37,8 +39,11 @@ const ClientAndBrandManagement = () => {
 
   const fetchClientsWithBrands = async (page = 1, limit = 10) => {
     try {
+   const status =
+     filter != "all" ? (filter == "active" ? "true" : "false") : "all";
+        console.log("🚀 ~ fetchClientsWithBrands ~ status:", status)
       const response = await fetch(
-        `${devTunnelUrl}get_clients_with_brands?page=${page}&limit=${limit}&search=${searchTerm}`,
+        `${devTunnelUrl}get_clients_with_brands?page=${page}&limit=${limit}&search=${searchTerm}&active=${status}`,
         {
           method: "GET",
           headers: {
@@ -68,7 +73,7 @@ const ClientAndBrandManagement = () => {
 
   useEffect(() => {
     fetchClientsWithBrands(currentPage, limit);
-  }, [devTunnelUrl, currentPage, searchTerm]);
+  }, [devTunnelUrl, currentPage, searchTerm,active,filter]);
 
   const addClient = async (event) => {
     event.preventDefault();
@@ -270,17 +275,17 @@ const ClientAndBrandManagement = () => {
           </form>
         </div>
 
-      
-          <DataTable
-            headers={["CLIENTS", "BRANDS", "ACTIONS"]}
-            data={clients}
-            brandInputs={brandInputs}
-            setBrandInputs={setBrandInputs}
-            handleAddBrand={handleAddBrand}
-            styling="w-1/2"
-            openModal={openModal}
-            openAlert={openAlert}
-          />
+        <FilterDropDown value={filter} setValue={setFilter} />
+        <DataTable
+          headers={["CLIENTS", "BRANDS", "ACTIONS"]}
+          data={clients}
+          brandInputs={brandInputs}
+          setBrandInputs={setBrandInputs}
+          handleAddBrand={handleAddBrand}
+          styling="w-1/2"
+          openModal={openModal}
+          openAlert={openAlert}
+        />
 
         <Pagination
           currentPage={currentPage}
@@ -342,7 +347,8 @@ const ClientAndBrandManagement = () => {
             </div>
             <div className="flex justify-center pb-4">
               <h1 className="text-4xl font-bold text-orange-600 justify-center">
-                Do you want to {active==true ? "Deactivate" : "Activate"} this Client?
+                Do you want to {active == true ? "Deactivate" : "Activate"} this
+                Client?
               </h1>
             </div>
             <AddButton text="Yes" handleSubmit={updateClientAndBrand} />

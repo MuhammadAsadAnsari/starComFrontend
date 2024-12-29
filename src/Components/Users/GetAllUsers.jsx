@@ -6,6 +6,8 @@ import Search from "../Search/Search";
 import AddButton from "../buttons/AddButton";
 import Pagination from "../Pagination/Pagination";
 import DataTable from "../DataTable/DataTable";
+import EnumDropDown from "../DropDown/EnumDropDown";
+import FilterDropDown from "../DropDown/FilterDropDown";
 
 const GetAllUsers = () => {
   const devTunnelUrl = import.meta.env.VITE_DEV_TUNNEL_URL;
@@ -13,6 +15,7 @@ const GetAllUsers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("add");
+  const [filter,setFilter]= useState("active")
   const [userId,setUserId] = useState()
   const [selectedUser, setSelectedUser] = useState({
     id: null,
@@ -30,10 +33,20 @@ const GetAllUsers = () => {
   const encryptedToken = localStorage.getItem("authCookie");
   const authToken = atob(encryptedToken);
 
+  const handleClientDelete = async(userId,clientId) => {
+    console.log("🚀 ~ handleClientDelete ~ clientId:", clientId)
+    console.log("🚀 ~ handleClientDelete ~ userId:", userId)
+    return {
+  }
+    
+
+  }
     const fetchUsers = async (page=1 ,limit=10) => {
       try {
+        const status = filter !="all" ? (filter=="active"?"true":"false") : "all";
+        console.log("🚀 ~ fetchUsers ~ status:", status)
         const response = await fetch(
-          `${devTunnelUrl}get_users?page=${page}&limit=${limit}&search=${searchTerm}`,
+          `${devTunnelUrl}get_users?page=${page}&limit=${limit}&search=${searchTerm}&active=${status}`,
           {
             method: "GET",
             headers: {
@@ -43,11 +56,108 @@ const GetAllUsers = () => {
           }
         );
         const data = await response.json();
-
-        if (response.ok) {
-          setUsers(data.data);
-          const _totalRecords = data.total
-          setTotalRecords(_totalRecords);
+      // const data = {
+      //   data: [
+      //     {
+      //       active: true,
+      //       clients: [
+      //         {
+      //           active: true,
+      //           id: 45,
+      //           name: "Vital Products",
+      //         },
+      //         {
+      //           active: true,
+      //           id: 46,
+      //           name: "Zameen Media",
+      //         },
+      //       ],
+      //       email: "babaranis@yahoo.com",
+      //       id: 27,
+      //       name: "Babar Anis",
+      //       role: "super_user",
+      //     },
+      //     {
+      //       active: true,
+      //       clients: [],
+      //       email: "owaisoddo@ando.com",
+      //       id: 26,
+      //       name: "Asadraza 34",
+      //       role: "super_user",
+      //     },
+      //     {
+      //       active: true,
+      //       clients: [],
+      //       email: "tayyab@gmail.com",
+      //       id: 25,
+      //       name: "Tayyab",
+      //       role: "user",
+      //     },
+      //     {
+      //       active: true,
+      //       clients: [],
+      //       email: "talib@gmail.com",
+      //       id: 24,
+      //       name: "Talib",
+      //       role: "user",
+      //     },
+      //     {
+      //       active: true,
+      //       clients: [],
+      //       email: "majid@gmail.com",
+      //       id: 23,
+      //       name: "Majid",
+      //       role: "user",
+      //     },
+      //     {
+      //       active: true,
+      //       clients: [],
+      //       email: "bilal@gmail.com",
+      //       id: 22,
+      //       name: "Bilal",
+      //       role: "user",
+      //     },
+      //     {
+      //       active: true,
+      //       clients: [],
+      //       email: "ali@gmail.com",
+      //       id: 21,
+      //       name: "Ali",
+      //       role: "user",
+      //     },
+      //     {
+      //       active: true,
+      //       clients: [],
+      //       email: "hasan@gmail.com",
+      //       id: 20,
+      //       name: "Hasan",
+      //       role: "user",
+      //     },
+      //     {
+      //       active: true,
+      //       clients: [],
+      //       email: "wahib@gmail.com",
+      //       id: 19,
+      //       name: "Wahib",
+      //       role: "user",
+      //     },
+      //     {
+      //       active: true,
+      //       clients: [],
+      //       email: "daniyal@gmail.com",
+      //       id: 18,
+      //       name: "Daniyal",
+      //       role: "user",
+      //     },
+      //   ],
+      //   total: 26,
+      // };
+      if (response.ok) {
+        console.log("🚀 ~ fetchUsers ~ data:", data)
+       setUsers(data.data);
+       const _totalRecords = data.total;
+       setTotalRecords(_totalRecords);
+   
         } else {
           toast.error(data.message || "Failed to fetch users.");
         }
@@ -57,7 +167,7 @@ const GetAllUsers = () => {
     };
   useEffect(() => {
     fetchUsers(currentPage, usersPerPage);
-  }, [devTunnelUrl, currentPage, searchTerm, active]);
+  }, [devTunnelUrl, currentPage, searchTerm, active,filter]);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value.toLowerCase());
@@ -212,17 +322,17 @@ const GetAllUsers = () => {
           <AddButton openModal={openModal} text="Add User" />
         </div>
       </div>
-
+  <FilterDropDown value={filter} setValue={setFilter} />
       <div
         className="overflow-y-auto"
         style={{ maxHeight: "calc(100vh - 200px)" }}
       >
         <DataTable
-          headers={["NAME", "EMAIL", "ROLE", "ACTIONS"]}
+          headers={["NAME", "EMAIL", "ROLE", "CLIENTS", "ACTIONS"]}
           data={users}
           openModal={openModal}
           openAlert={openAlert}
-          
+          handleClientDelete = {handleClientDelete}
         />
       </div>
 
@@ -291,7 +401,7 @@ const GetAllUsers = () => {
             <AddButton
               text={modalType === "add" ? "Add User" : "Save Changes"}
               handleSubmit={handleSubmit}
-              update = {true}
+              update={true}
             />
           </div>
         </div>
@@ -305,12 +415,11 @@ const GetAllUsers = () => {
               </button>
             </div>
             <div className="flex justify-center pb-4">
-           
               <h1 className="text-4xl font-bold text-orange-600 justify-center">
                 Do you want to {active ? "Deactivate" : "Activate"} this User?
               </h1>
             </div>
-            <AddButton text="Yes" handleSubmit={()=>handleSubmit("delete")} />
+            <AddButton text="Yes" handleSubmit={() => handleSubmit("delete")} />
           </div>
         </div>
       )}

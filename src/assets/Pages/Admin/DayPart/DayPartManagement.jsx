@@ -128,10 +128,13 @@ const addDayPartTpye = async()=>{
 }
 
   const openModal = (type = "edit", slot) => {
+    console.log("Aaaa")
     if (type == "add") {
       setIsModalOpen(true);
       return;
     }
+    console.log("Aaaa 2",slot);
+
     setSelectedSlot(slot);
     setUpdatedDayPart(slot.dayPartTypeId);
   };
@@ -216,32 +219,30 @@ const addDayPartTpye = async()=>{
         <ToastNotification />
         <div className="flex justify-between mb-6 space-x-4 align-middle">
           <AdminInput
-            text="STD Value: "
+            text="STD Dev: "
             value={deviation}
             setValue={setDeviation}
             handleValue={handleValue}
             type="Standard Deviation"
           />
           <AdminInput
-            text="Point Value: "
+            text="Pointing Threshold: "
             value={pointValue}
             setValue={setPointValue}
             handleValue={handleValue}
             type="Threshold"
           />
 
-       
           <div className="w-1/3">
             <AddButton openModal={openModal} text="Add Day Part" />
           </div>
         </div>
 
-      
-          <DataTable
-            headers={["TIMINGS", "DAY PART"]}
-            data={timeSlots}
-            openModal={openModal}
-          />
+        <DataTable
+          headers={["TIMINGS", "DAY PART"]}
+          data={timeSlots}
+          openModal={openModal}
+        />
 
         <Pagination
           currentPage={currentPage}
@@ -279,35 +280,46 @@ const addDayPartTpye = async()=>{
             </div>
           </div>
         )}
-        {selectedSlot && (
-          <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-              <h3 className="text-lg font-semibold mb-4 text-[#E73C30]">
-                Update Day Part
-              </h3>
+        {selectedSlot &&
+          (console.log("Selected Slot:", selectedSlot), // Logs the selected slot to the console
+          (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+                <h3 className="text-lg font-semibold mb-4 text-[#E73C30]">
+                  Update Day Part
+                </h3>
 
-              <EnumDropDown
-                data={dayPartEnum.dropdown}
-                value={updatedDayPart}
-                setValue={setUpdatedDayPart}
-              />
-              <div className="flex justify-end space-x-2">
-                <button
-                  onClick={() => setSelectedSlot(null)}
-                  className="font-semibold px-4 py-2 rounded-full transition duration-300 bg-gray-300 text-gray-700 hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleUpdate}
-                  className="font-semibold px-4 py-2 rounded-full transition duration-300 bg-gradient-to-r from-[#E73C30] to-[#F58220] text-white hover:bg-white hover:text-[#E73C30] hover:border-2 hover:border-[#E73C30]"
-                >
-                  Update
-                </button>
+                <EnumDropDown
+                  data={dayPartEnum.dropdown}
+                  value={updatedDayPart}
+                  setValue={setUpdatedDayPart}
+                />
+                <div className="flex justify-end space-x-2">
+                  <button
+                    onClick={() => {
+                      console.log("Cancel button clicked");
+                      setSelectedSlot(null);
+                    }}
+                    className="font-semibold px-4 py-2 rounded-full transition duration-300 bg-gray-300 text-gray-700 hover:bg-gray-400"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      console.log(
+                        "Update button clicked with value:",
+                        updatedDayPart
+                      );
+                      handleUpdate();
+                    }}
+                    className="font-semibold px-4 py-2 rounded-full transition duration-300 bg-gradient-to-r from-[#E73C30] to-[#F58220] text-white hover:bg-white hover:text-[#E73C30] hover:border-2 hover:border-[#E73C30]"
+                  >
+                    Update
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          ))}
       </div>
     </div>
   );

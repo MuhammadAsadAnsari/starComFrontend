@@ -9,8 +9,7 @@ const SideNav = ({setFields}) => {
   const handleLogout = () => {
     localStorage.removeItem("authCookie");
     window.location.href = "/login";
-    localStorage.removeItem("lastVisitedRoute");
-    localStorage.removeItem("userRole");
+   localStorage.clear();
   };
 
 
