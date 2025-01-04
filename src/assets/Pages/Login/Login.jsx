@@ -21,7 +21,6 @@ const Login = () => {
 
   const handleLoginClick = async () => {
     try {
-      console.log('Login clicked',email,password);
       setIsLoading(true);
       const response = await fetch(`${devTunnelUrl}login`, {
         method: "POST",
@@ -31,7 +30,6 @@ const Login = () => {
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
-      console.log("🚀 ~ handleLoginClick ~ data:", data)
       setIsLoading(false);
       if (data.status && data.token) {
         toast.success("Login successful.");

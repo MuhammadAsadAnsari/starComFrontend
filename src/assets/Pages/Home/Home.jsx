@@ -23,7 +23,6 @@ const Home = () => {
   const user_data = JSON.parse(localStorage.getItem("user_data"));
   const fileData = JSON.parse(localStorage.getItem("data"));
 
-
   const [fields, setFields] = useState(user_data || {});
 
   const [noOfCopies, setNoOfCopies] = useState({});
@@ -41,6 +40,9 @@ const Home = () => {
   const [budgets, setBudgets] = useState([]);
   const [validateCopies, setValidatesCopies] = useState(false);
   const role = localStorage.getItem("userRole");
+  const [clientName, setClientName] = useState("");
+  const [brandName, setBrandName] = useState("");
+
 
   let validatebudget = !fields.budget;
   useEffect(() => {
@@ -79,6 +81,47 @@ const Home = () => {
     validateCopies,
     validatebudget,
   ]);
+
+  const getClientDetails = async (clientId) => {
+    try {
+      const clientDetailsResponse = await fetch(
+        `${devTunnelUrl}get_client_name/${clientId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${authToken}`,
+          },
+        }
+      );
+      const data = await clientDetailsResponse.json();
+      
+      setClientName(data.data.client.name);
+    } catch (error) {
+      toast.error("An error occurred..");
+    }
+  };
+
+   const getBrandDetails = async (brandId) => {
+     try {
+       const brandDetailsResponse = await fetch(
+         `${devTunnelUrl}get_brand_name/${brandId}`,
+         {
+           method: "GET",
+           headers: {
+             "Content-Type": "application/json",
+             Authorization: `${authToken}`,
+           },
+         }
+       );
+       
+       const data = await brandDetailsResponse.json();
+
+       setBrandName(data.brand.name);
+     } catch (error) {
+       toast.error("An error occurred.");
+     }
+   };
   const fetchDayPartsTypes = async () => {
     try {
       const dayPartReponse = await fetch(`${devTunnelUrl}get_daypart_types`, {
@@ -203,7 +246,7 @@ const Home = () => {
         client_id: fields.client_id,
         select: fields.select,
         dates: fields.dates,
-        budget: fields.budget,
+        budget: fields?.budget || parseInt(budget),
         no_of_copies: noOfCopies,
         day_part: dayParts,
         genre: genreSplitFields,
@@ -218,15 +261,14 @@ const Home = () => {
       if (fields?.input_file) formData.append("input_file", fields.input_file);
 
       if (fields?.rate_file) formData.append("rate_file", fields.rate_file);
-    
+
       if (fileData?.user_data_key)
         formData.append("user_data_key", fileData.user_data_key);
-    
+
       if (fileData?.rate_file_key)
-          formData.append("rate_file_key", fileData.rate_file_key);
+        formData.append("rate_file_key", fileData.rate_file_key);
 
       try {
-        console.log("🚀 ~ handleSubmit ~ formData:", formData)
         // Store input_file and rate_file in local as Base64
 
         const response = await fetch(`${devTunnelUrl}generate-ratings-report`, {
@@ -236,7 +278,6 @@ const Home = () => {
           },
           body: formData,
         });
-        console.log("🚀 ~ handleSubmit ~ response:", response)
         if (!response.ok)
           return toast.error("Error creating summary:", response.message);
 
@@ -245,7 +286,7 @@ const Home = () => {
         localStorage.setItem("data", JSON.stringify(data));
         localStorage.setItem("user_data", JSON.stringify(newfields));
 
-        navigate('/summary');
+        navigate("/summary");
       } catch (error) {
         toast.error(response.message);
       } finally {
@@ -253,7 +294,14 @@ const Home = () => {
       }
     }
   };
-
+const toTitleCase = (str) => {
+  return str
+    .replace(/([A-Z])/g, " $1") // Add a space before each uppercase letter
+    .replace(/^./, (char) => char.toUpperCase()) // Capitalize the first character
+    .split(" ") // Split the string into words
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+    .join(" "); // Join them back with a space
+};
   return (
     <div className='flex flex-col md:flex-row w-full h-screen bg-cover bg-center bg-no-repeat bg-[url("https://i.ibb.co/S69yyvw/thumbnail.jpg")]'>
       <SideNav setFields={setFields} />
@@ -301,7 +349,6 @@ const Home = () => {
             />
             {Object.keys(fields).length > 0 &&
               Object.entries(fields).map(([key, value]) => {
-                console.log("🚀 ~ Object.entries ~ key:", key)
                 if (key === "dates") {
                   return (
                     <React.Fragment key="dates">
@@ -318,18 +365,28 @@ const Home = () => {
                     </React.Fragment>
                   );
                 } else if (key == "client_id") {
-                return (
-                  <SelectedDropDown
-                    key={key} // Ensures unique key for each item
-                    text={key === "select" ? value : ""}
-                    styling="s:mx-1 s:w-[25%] s:justify-between"
-                  />
-                );
-                } else {
+                  getClientDetails(value);
                   return (
                     <SelectedDropDown
                       key={key} // Ensures unique key for each item
-                      text={key === "select" ? value : ""}
+                      text={clientName}
+                      styling="s:mx-1 s:w-[25%] s:justify-between"
+                    />
+                  );
+                } else if (key =="brand_id") {
+                  getBrandDetails(value);
+                  return (
+                    <SelectedDropDown
+                      key={key} // Ensures unique key for each item
+                      text={brandName}
+                      styling="s:mx-1 s:w-[25%] s:justify-between"
+                    />
+                  );
+                } else if (key == "select") {
+                  return (
+                    <SelectedDropDown
+                      key={key} // Ensures unique key for each item
+                      text={key === "select" ? toTitleCase(value) : ""}
                       styling="s:mx-1 s:w-[25%] s:justify-between"
                     />
                   );
@@ -385,25 +442,10 @@ const Home = () => {
           )}
           {Object.keys(fields).length > 0 && (
             <>
-              <div className="basis-[35%]"></div>
+              <div className="basis-[15%]"></div>
               <div className="flex flex-col basis-[65%] ">
                 <div className="flex flex-col basis-[10%] gap-[1%] pr-[1%] md:pr-0 md:gap-[6%] lg:flex-row"></div>
                 <div className="flex flex-col basis-[42%] justify-center">
-                  {/* <div className="flex flex-col mb-[1%] w-2/3 lg:w-full lg:pr-[26%] xxl:pr-[28%] 2xl:pr-[27%] 3xl:pr-[25%]">
-                    <label className="text-[#282828] text-s font-poppins ss:text-lg">
-                      GRP Target
-                    </label>
-                    <Input
-                      text="Enter GRP Target"
-                      value={grpTarget}
-                      onChange={(e) =>
-                        handleInputChange("grpTarget", e.target.value)
-                      }
-                    />
-                    {errors.grpTarget && (
-                      <p className="text-red-500 mt-1">{errors.grpTarget}</p>
-                    )}
-                  </div> */}
                   <HomeParagraph text="Day Part" />
                   {dayPartEnum.map((part) => (
                     <GenreSplitField

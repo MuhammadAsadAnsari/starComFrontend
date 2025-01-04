@@ -30,7 +30,7 @@ const ClientAndBrandManagement = () => {
   const [newBrands, setNewBrands] = useState([]); // List of brands for the modal
   const [selectedOptions, setSelectedOptions] = useState([]); // Selected brands in AsyncSelect
   const [openDeleteModel, setOpenDeleteModel] = useState(false);
-  const [filter,setFilter] = useState("active");
+      const [filter,setFilter] = useState("active");
 
   const limit = 10;
 
@@ -41,7 +41,6 @@ const ClientAndBrandManagement = () => {
     try {
    const status =
      filter != "all" ? (filter == "active" ? "true" : "false") : "all";
-        console.log("🚀 ~ fetchClientsWithBrands ~ status:", status)
       const response = await fetch(
         `${devTunnelUrl}get_clients_with_brands?page=${page}&limit=${limit}&search=${searchTerm}&active=${status}`,
         {
@@ -182,26 +181,33 @@ const ClientAndBrandManagement = () => {
     setSelectedOptions([]);
   };
 
-  const updateClientAndBrand = async () => {
+  const updateClientAndBrand = async (type) => {
     try {
 
-      const response = await fetch(`${devTunnelUrl}update_client_or_brands/${newClientId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${authToken}`,
-        },
-        body: JSON.stringify({
-          client: {
-            ...(newClient && {name: newClient}),
-            active:!active,
-            brands: selectedOptions.map((option) => ({
-              id: option.value,
-              name: option.label,
-            })),
+     
+      const response = await fetch(
+        `${devTunnelUrl}update_client_or_brands/${newClientId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${authToken}`,
           },
-        }),
-      });
+          body: JSON.stringify({
+            client: {
+              ...(type == "delete"
+                ? { active: !active }
+                : {
+                    ...(newClient && { name: newClient }),
+                    brands: selectedOptions.map((option) => ({
+                      id: option.value,
+                      name: option.label,
+                    })),
+                  }),
+            },
+          }),
+        }
+      );
 
       if (response.ok) {
         fetchClientsWithBrands(currentPage, limit);
@@ -322,7 +328,7 @@ const ClientAndBrandManagement = () => {
             </div>
             <div className="flex justify-end mt-4">
               <button
-                onClick={updateClientAndBrand}
+                onClick={()=>updateClientAndBrand("edit")}
                 className="bg-gradient-to-r from-[#E73C30] to-[#F58220] text-white font-semibold p-2 rounded-lg mr-2 hover:bg-white hover:text-[#E73C30] hover:border-2 hover:border-[#E73C30] transition duration-300"
               >
                 Save
@@ -351,7 +357,7 @@ const ClientAndBrandManagement = () => {
                 Client?
               </h1>
             </div>
-            <AddButton text="Yes" handleSubmit={updateClientAndBrand} />
+            <AddButton text="Yes" handleSubmit={()=>updateClientAndBrand("delete")} />
           </div>
         </div>
       )}

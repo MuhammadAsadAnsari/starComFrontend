@@ -161,7 +161,6 @@ const Div1 = ({ setFields }) => {
   };
 
   const handleClientChange = async (value) => {
-    console.log("🚀 ~ handleClientChange ~ value:", value);
     setNewClient(value);
     try {
       const response = await fetch(
@@ -174,7 +173,6 @@ const Div1 = ({ setFields }) => {
           },
         }
       );
-      console.log("🚀 ~ handleClientChange ~ response:", response);
       if (response.status == 404) {
         toast.error("No Data found for client");
         return;
@@ -188,7 +186,6 @@ const Div1 = ({ setFields }) => {
       setRateFileName("Upload Rate File");
       fileRateInputRef = null;
     }
-    console.log("🚀 ~ useEffect ~ rate:", rate)
   }, [rate]);
 
   const isContinueDisabled = !(
@@ -242,7 +239,7 @@ const Div1 = ({ setFields }) => {
         </div>
 
         <div className="w-full flex flex-col mb-2 lg:mb-6">
-          <label className="mt-4 text-sm font-semibold">Select Rates</label>
+          <label className="mt-2 2xl:mt-4 text-sm font-semibold">Select Rates</label>
           <div className="flex items-center gap-4 mt-2">
             <label>
               <input
@@ -303,11 +300,12 @@ const Div1 = ({ setFields }) => {
                 onChange={handleStartDateChange}
                 dateFormat="yyyy/MM/dd"
                 placeholderText="Starting Date"
-                className="w-full"
+                className="w-full focus:outline-none focus:ring-0 pointer-events-none" // Disable pointer events
                 ref={startDateRef}
               />
+
               <FaCalendarAlt
-                className="absolute right-2 top-3 text-[#53615A] cursor-pointer"
+                className="absolute right-2 top-3 text-[#53615A] cursor-pointer pointer-events-auto" // Re-enable pointer events for the icon
                 onClick={() => startDateRef.current.setFocus()}
               />
             </div>
@@ -322,11 +320,11 @@ const Div1 = ({ setFields }) => {
                 onChange={handleEndDateChange}
                 dateFormat="yyyy/MM/dd"
                 placeholderText="Ending Date"
-                className="w-full"
+                className="w-full focus:outline-none focus:ring-0 pointer-events-none"
                 ref={endDateRef}
               />
               <FaCalendarAlt
-                className="absolute right-2 top-3 text-[#53615A] cursor-pointer"
+                className="absolute right-2 top-3 text-[#53615A] cursor-pointer pointer-events-auto"
                 onClick={() => endDateRef.current.setFocus()}
               />
             </div>
@@ -336,7 +334,7 @@ const Div1 = ({ setFields }) => {
       </div>
       <Button
         text="CONTINUE"
-        styling="mt-8 mr-12 ss:mr-20 lg:mr-32"
+        styling="mt-4 2xl:mt-8 mr-12 ss:mr-20 lg:mr-32"
         disabled={isContinueDisabled}
         onClick={handleContinue}
       />

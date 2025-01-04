@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import { FaTimes } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -15,8 +15,9 @@ const GetAllUsers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("add");
-  const [filter,setFilter]= useState("active")
-  const [userId,setUserId] = useState()
+  const [filter, setFilter] = useState("active");
+  const [userId, setUserId] = useState();
+  const [clients, setClients] = useState([]);
   const [selectedUser, setSelectedUser] = useState({
     id: null,
     name: "",
@@ -32,142 +33,54 @@ const GetAllUsers = () => {
   const usersPerPage = 13;
   const encryptedToken = localStorage.getItem("authCookie");
   const authToken = atob(encryptedToken);
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [tagsVisible, setTagsVisible] = useState(true); 
+  const [selectedClients, setSelectedClients] = useState();
+  const [isInputFocused,setIsInputFocused]= useState(false);
 
-  const handleClientDelete = async(userId,clientId) => {
-    console.log("🚀 ~ handleClientDelete ~ clientId:", clientId)
-    console.log("🚀 ~ handleClientDelete ~ userId:", userId)
-    return {
-  }
+  const handleClientDelete = async (userId, clientId) => {
+
+    const response = await fetch(`${devTunnelUrl}unlink_client_from_user`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `${authToken}`,
+      },
+      body: JSON.stringify({ user_id: userId, client_ids: [clientId] }),
+    });
     
-
-  }
-    const fetchUsers = async (page=1 ,limit=10) => {
-      try {
-        const status = filter !="all" ? (filter=="active"?"true":"false") : "all";
-        console.log("🚀 ~ fetchUsers ~ status:", status)
-        const response = await fetch(
-          `${devTunnelUrl}get_users?page=${page}&limit=${limit}&search=${searchTerm}&active=${status}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `${authToken}`,
-            },
-          }
-        );
-        const data = await response.json();
-      // const data = {
-      //   data: [
-      //     {
-      //       active: true,
-      //       clients: [
-      //         {
-      //           active: true,
-      //           id: 45,
-      //           name: "Vital Products",
-      //         },
-      //         {
-      //           active: true,
-      //           id: 46,
-      //           name: "Zameen Media",
-      //         },
-      //       ],
-      //       email: "babaranis@yahoo.com",
-      //       id: 27,
-      //       name: "Babar Anis",
-      //       role: "super_user",
-      //     },
-      //     {
-      //       active: true,
-      //       clients: [],
-      //       email: "owaisoddo@ando.com",
-      //       id: 26,
-      //       name: "Asadraza 34",
-      //       role: "super_user",
-      //     },
-      //     {
-      //       active: true,
-      //       clients: [],
-      //       email: "tayyab@gmail.com",
-      //       id: 25,
-      //       name: "Tayyab",
-      //       role: "user",
-      //     },
-      //     {
-      //       active: true,
-      //       clients: [],
-      //       email: "talib@gmail.com",
-      //       id: 24,
-      //       name: "Talib",
-      //       role: "user",
-      //     },
-      //     {
-      //       active: true,
-      //       clients: [],
-      //       email: "majid@gmail.com",
-      //       id: 23,
-      //       name: "Majid",
-      //       role: "user",
-      //     },
-      //     {
-      //       active: true,
-      //       clients: [],
-      //       email: "bilal@gmail.com",
-      //       id: 22,
-      //       name: "Bilal",
-      //       role: "user",
-      //     },
-      //     {
-      //       active: true,
-      //       clients: [],
-      //       email: "ali@gmail.com",
-      //       id: 21,
-      //       name: "Ali",
-      //       role: "user",
-      //     },
-      //     {
-      //       active: true,
-      //       clients: [],
-      //       email: "hasan@gmail.com",
-      //       id: 20,
-      //       name: "Hasan",
-      //       role: "user",
-      //     },
-      //     {
-      //       active: true,
-      //       clients: [],
-      //       email: "wahib@gmail.com",
-      //       id: 19,
-      //       name: "Wahib",
-      //       role: "user",
-      //     },
-      //     {
-      //       active: true,
-      //       clients: [],
-      //       email: "daniyal@gmail.com",
-      //       id: 18,
-      //       name: "Daniyal",
-      //       role: "user",
-      //     },
-      //   ],
-      //   total: 26,
-      // };
-      if (response.ok) {
-        console.log("🚀 ~ fetchUsers ~ data:", data)
-       setUsers(data.data);
-       const _totalRecords = data.total;
-       setTotalRecords(_totalRecords);
-   
-        } else {
-          toast.error(data.message || "Failed to fetch users.");
+    if (!response.ok) return toast.error("something went wrong.");
+    const data = await response.json();
+    toast.success(data.message);
+    fetchUsers(currentPage,usersPerPage);
+  };
+  const fetchUsers = async (page = 1, limit = 10) => {
+    try {
+      const status =
+        filter != "all" ? (filter == "active" ? "true" : "false") : "all";
+      const response = await fetch(
+        `${devTunnelUrl}get_users?page=${page}&limit=${limit}&search=${searchTerm}&active=${status}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${authToken}`,
+          },
         }
-      } catch (error) {
-        toast.error("An error occurred while fetching users.");
+      );
+      const data = await response.json();
+
+      if (response.ok) {
+        setUsers(data.data);
+        const _totalRecords = data.total;
+        setTotalRecords(_totalRecords);
+      } else {
+        toast.error(data.message || "Failed to fetch users.");
       }
-    };
-  useEffect(() => {
-    fetchUsers(currentPage, usersPerPage);
-  }, [devTunnelUrl, currentPage, searchTerm, active,filter]);
+    } catch (error) {
+      toast.error("An error occurred while fetching users.");
+    }
+  };
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value.toLowerCase());
@@ -175,8 +88,8 @@ const GetAllUsers = () => {
   };
 
   const totalPages = Math.ceil(totalRecords / usersPerPage);
-  
-  const openModal = (type="add", user = {}) => {
+
+  const openModal = (type = "add", user = {}) => {
     setModalType(type);
     setSelectedUser(
       type === "edit"
@@ -205,7 +118,6 @@ const GetAllUsers = () => {
       return; // Prevent form submission if passwords don't match
     }
 
-
     if (modalType === "add") {
       const { name, email, password, confirmPassword, role } = selectedUser;
       if (!name || !email || !password || !confirmPassword || !role) {
@@ -226,7 +138,6 @@ const GetAllUsers = () => {
       ...(selectedUser?.role && { role: selectedUser.role }),
     };
 
-
     try {
       let response;
       let data;
@@ -244,27 +155,25 @@ const GetAllUsers = () => {
 
         if (response.ok) {
           toast.success("User added successfully!");
-          fetchUsers(currentPage,usersPerPage)
+          fetchUsers(currentPage, usersPerPage);
           // setUsers((prevUsers) => [data.user, ...prevUsers]); // Add the new user to the list
           closeModal();
         } else {
           toast.error(data.message || "Failed to add user.");
         }
       } else if (modalType === "edit") {
-    
         // Update user (PUT request)
-        const id = type == "delete" ? userId:selectedUser.id
-        response = await fetch(
-          `${devTunnelUrl}update_user/${id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `${authToken}`,
-            },
-            body: JSON.stringify((type=="delete" ? {active: !active} :newUser )),
-          }
-        );
+        const id = type == "delete" ? userId : selectedUser.id;
+        response = await fetch(`${devTunnelUrl}update_user/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${authToken}`,
+          },
+          body: JSON.stringify(
+            type == "delete" ? { active: !active } : newUser
+          ),
+        });
         data = await response.json();
 
         if (response.ok) {
@@ -281,10 +190,9 @@ const GetAllUsers = () => {
                 : user
             )
           );
-          setActive((prev) => !prev )
+          setActive((prev) => !prev);
           closeModal();
           closeDeleteModal();
-
         } else {
           toast.error(data.message || "Failed to update user.");
         }
@@ -298,13 +206,68 @@ const GetAllUsers = () => {
     const { name, value } = e.target;
     setSelectedUser((prev) => ({ ...prev, [name]: value }));
   };
-  const openAlert = (type,Id,active) => {
-    setActive(active)
-    setUserId(Id)
-    setModalType(type)
+  const openAlert = (type, Id, active) => {
+    setActive(active);
+    setUserId(Id);
+    setModalType(type);
     setOpenDeleteModel(true);
   };
 
+  const linkedClientWithUser = async (clientId, userId) => {
+    const response = await fetch(`${devTunnelUrl}link_client_to_user`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `${authToken}`,
+      },
+      body: JSON.stringify({ user_id: userId, client_ids: [clientId] }),
+    });
+
+    if (!response.ok) return toast.error("something went wrong.");
+
+    const data = await response.json();
+    toast.success(data.message);
+    setSelectedClients("")
+    fetchUsers(currentPage, usersPerPage);
+    setDropdownVisible(userId)
+  };
+  const getAllClients = async () => {
+    try {
+      const response = await fetch(
+        `${devTunnelUrl}get_clients_with_brands?active=true`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${authToken}`,
+          },
+        }
+      );
+      if (response.ok) {
+        const _data = await response.json();
+        const data = _data.data;
+
+        setClients(Array.isArray(data) ? data : []);
+      } else {
+        setClients([]);
+      }
+    } catch (error) {
+      setClients([]);
+    }
+  };
+  useEffect(() => {
+    fetchUsers(currentPage, usersPerPage);
+    getAllClients();
+  }, [devTunnelUrl, currentPage, searchTerm, active, filter]);
+const toggleTagsVisibility = (itemId) => {
+  setTagsVisible((prevState) => ({
+    ...prevState,
+    [itemId]: !prevState[itemId],
+  }));
+};
+
+// Check visibility for specific item
+const isTagsVisible = (itemId) => tagsVisible[itemId];
   return (
     <div className="p-6 bg-white min-h-screen text-gray-800">
       <ToastContainer autoClose={2000} position="top-center" />
@@ -322,7 +285,7 @@ const GetAllUsers = () => {
           <AddButton openModal={openModal} text="Add User" />
         </div>
       </div>
-  <FilterDropDown value={filter} setValue={setFilter} />
+      <FilterDropDown value={filter} setValue={setFilter} />
       <div
         className="overflow-y-auto"
         style={{ maxHeight: "calc(100vh - 200px)" }}
@@ -332,7 +295,18 @@ const GetAllUsers = () => {
           data={users}
           openModal={openModal}
           openAlert={openAlert}
-          handleClientDelete = {handleClientDelete}
+          handleClientDelete={handleClientDelete}
+          linkedClientWithUser={linkedClientWithUser}
+          clientsUserData={clients}
+          dropdownVisible={dropdownVisible}
+          setDropdownVisible={setDropdownVisible}
+          selectedClients={selectedClients}
+          setSelectedClients={setSelectedClients}
+     
+          isInputFocused= {isInputFocused}
+          setIsInputFocused= {setIsInputFocused}
+          toggleTagsVisibility= {toggleTagsVisibility}
+          isTagsVisible = {isTagsVisible}
         />
       </div>
 
