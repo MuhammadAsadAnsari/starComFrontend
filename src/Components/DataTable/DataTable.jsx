@@ -4,7 +4,6 @@ import React from "react";
 const DataTable = ({
   headers,
   data,
-  onRowClick,
   brandInputs,
   setBrandInputs,
   handleAddBrand,
@@ -42,7 +41,7 @@ const DataTable = ({
                   <tr
                     key={index + 1}
                     className="border border-gray-300 bg-white hover:bg-gray-100"
-                    onClick={() => onRowClick && onRowClick(item)}
+                    onClick={() => openModal && openModal("edit",item)}
                   >
                     <td
                       className={`${styling && "p-3"} py-3 text-center`}
