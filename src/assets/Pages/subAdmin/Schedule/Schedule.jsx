@@ -15,7 +15,7 @@ const Schedule = () => {
   const authToken = atob(encryptedToken);
   const fileInputRef = useRef(null);
   const [uploadRates, setUploadRates] = useState("Upload file");
-  const [downloadRates, setDownloadRates] = useState("Downloading Exists");
+  const [downloadRates, setDownloadRates] = useState("Download file");
   const [selectedClient, setSelectedClient] = useState("");
   const [clientData, setClientData] = useState([]);
   const [downloadEnabled, setDownloadEnabled] = useState(false);
@@ -41,85 +41,82 @@ const Schedule = () => {
   fetchClientData();
 
   const handleUpload = async () => {
-     fileInputRef.current.click();
+    fileInputRef.current.click();
   };
-  const handleDownload = async() => {
- fetch(
-   `${devTunnelUrl}/download_client_rates?client_id=${selectedClient}&download=true`,
-   {
-     method: "GET",
-     headers: {
-       Authorization: `${authToken}`,
-     },
-   }
- )
-   .then((response) => {
-     if (!response.ok) {
-       throw new Error(`HTTP error! Status: ${response.status}`);
-     }
-     return response.arrayBuffer();
-   })
-   .then((buffer) => {
-     console.log("Buffer data:", buffer);
+  const handleDownload = async () => {
+    fetch(
+      `${devTunnelUrl}/download_client_rates?client_id=${selectedClient}&download=true`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `${authToken}`,
+        },
+      }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.arrayBuffer();
+      })
+      .then((buffer) => {
 
-     // Convert buffer to a Blob or save it as a file
-     const blob = new Blob([buffer]);
-     const url = URL.createObjectURL(blob);
+        // Convert buffer to a Blob or save it as a file
+        const blob = new Blob([buffer]);
+        const url = URL.createObjectURL(blob);
 
-     // Create a download link (for example)
-     const a = document.createElement("a");
-     a.href = url;
-     a.download = "client_rates.xlsx"; // Change file extension accordingly
-     a.click();
+        // Create a download link (for example)
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "client_rates.xlsx"; // Change file extension accordingly
+        a.click();
 
-     // Revoke object URL to free memory
-     URL.revokeObjectURL(url);
-   })
-   .catch((error) => {
-     console.error("Error fetching the buffer:", error);
-   });
-
+        // Revoke object URL to free memory
+        URL.revokeObjectURL(url);
+      })
+      .catch((error) => {
+        console.error("Error fetching the buffer:", error);
+      });
   };
- const handleClientChange = async (value) => {
-   setSelectedClient(value);
-   try {
-     const response = await fetch(
-       `${devTunnelUrl}get_client_rates?client_id=${value}`,
-       {
-         method: "GET",
-         headers: {
-           "Content-Type": "application/json",
-           Authorization: `${authToken}`,
-         },
-       }
-     );
-     console.log("🚀 ~ handleClientChange ~ response:", response);
-     if (response.status == 404) {
-       setFileData(null);
-       setDownloadEnabled(false);
-       setDataFounds("No Data Found.Please Upload file");
-       return;
-     } else if (!response.ok) return toast.error("Failed to get client rates");
+  const handleClientChange = async (value) => {
+    setSelectedClient(value);
+    try {
+      const response = await fetch(
+        `${devTunnelUrl}get_client_rates?client_id=${value}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${authToken}`,
+          },
+        }
+      );
+      if (response.status == 404) {
+        setFileData(null);
+        setDownloadEnabled(false);
+        setDownloadRates("Downloading Exists");
+        setDataFounds("No Data Found.Please Upload file");
+        return;
+      } else if (!response.ok) return toast.error("Failed to get client rates");
 
-     const data = await response.json();
-     console.log("🚀 ~ handleClientChange ~ data:", data);
-     setFileData(data.data);
-     setDownloadEnabled(true);
-   } catch (error) {
-     toast.error("Error while fetching file");
-   }
- };
+      const data = await response.json();
+      setFileData(data.data);
+      setDownloadEnabled(true);
+    } catch (error) {
+      toast.error("Error while fetching file");
+    }
+  };
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
-    console.log("🚀 ~ handleFileChange ~ file:");
-    if (file.name.split(".")[1] != "xlsx" && file.name.split(".")[1] !="xls")
-    {
-      toast.error("Invalid file format. Please upload an Excel (.xlsx) or Excel (.xls) file.");
+    if (file.name.split(".")[1] != "xlsx" && file.name.split(".")[1] != "xls") {
+      toast.error(
+        "Invalid file format. Please upload an Excel (.xlsx) or Excel (.xls) file."
+      );
       return;
     }
-      if (file) {
-        setUploadRates(file.name);
-      }
+    if (file) {
+      setUploadRates(file.name);
+    }
     try {
       const formData = new FormData();
       formData.append("client_id", selectedClient);
@@ -133,31 +130,51 @@ const Schedule = () => {
         },
         body: formData,
       });
-      console.log("🚀 ~ handleFileChange ~ response:", response);
       if (!response.ok) return toast.error("File to fetch.");
       else if (response.status == 200) {
         const data = await response.json();
         toast.success(data.message);
-        handleClientChange(selectedClient)
+        handleClientChange(selectedClient);
       }
     } catch (error) {
       toast.error("Failed to upload file");
     }
   };
 
- 
-
   const formatDateTime = (dateTime) => {
     const date = new Date(dateTime);
-    const formattedDate = date.toLocaleDateString("en-CA"); // Format: YYYY-MM-DD
     const formattedTime = date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     }); // Format: hh:mm AM/PM
-    return `${formattedDate} (${formattedTime})`;
+    return `${formattedTime}`;
   };
+  const handleDeleteRates = async () => {
+    try {
+      const response = await fetch(
+        `${devTunnelUrl}delete_client_rates/${selectedClient}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${authToken}`,
+          },
+        }
+      );
 
+      if (!response.ok) return toast.error("Error deleting client rates.");
+      const data = await response.json();
+
+      toast.success(data.message);
+      setFileData(null);
+      setDownloadEnabled(false);
+      setDataFounds("No Data Found.Please Upload file");
+      return;
+    } catch (error) {
+      toast.error("Error while deleting rates.");
+    }
+  };
   return (
     <div className="flex flex-col md:flex-row w-full h-screen bg-cover bg-center bg-no-repeat bg-[url('https://i.ibb.co/S69yyvw/thumbnail.jpg')]">
       <SideNav />
@@ -177,13 +194,26 @@ const Schedule = () => {
         </div>
 
         <div className="flex flex-col pl-[10%] w-[40%]">
-          <DropDown
-            labeltext="Client"
-            placeholdertext="Select Client"
-            data={clientData}
-            onChange={(e) => handleClientChange(e.target.value)}
-            value={selectedClient}
-          />
+          <div className="flex items-center justify-between">
+            <DropDown
+              labeltext="Client"
+              placeholdertext="Select Client"
+              data={clientData}
+              onChange={(e) => handleClientChange(e.target.value)}
+              value={selectedClient}
+            />
+            <Button
+              text="DELETE"
+              styling={`px-10 mt-6 ${
+                !selectedClient || !downloadEnabled
+                  ? "cursor-not-allowed opacity-50"
+                  : ""
+              }`}
+              onClick={() =>
+                selectedClient && downloadEnabled && handleDeleteRates()
+              }
+            />
+          </div>
           <div className="flex gap-10 my-2 lg:my-4">
             <div className="w-full flex flex-col">
               <label className="text-sm text-[#282828] font-poppins ss:text-lg mb-2">
@@ -234,7 +264,12 @@ const Schedule = () => {
 
         {/* Table Section */}
         <div className="mt-2 px-[10%]">
-          <div className="overflow-y-auto max-h-80 border border-gray-300 rounded-lg">
+          <div
+            className="overflow-y-auto border border-gray-300 rounded-lg 
+            max-h-64 2xl:max-h-80
+        
+       "
+          >
             {fileData && fileData.length > 0 ? (
               <table className="w-full border-collapse">
                 <thead className="sticky top-0 bg-gray-100 z-10">

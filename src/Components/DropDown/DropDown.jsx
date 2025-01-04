@@ -21,14 +21,14 @@ onChange,
       <div className="flex flex-col border-[1px] py-3 pl-3 border-[#DEDEDE] rounded-lg 2xl:py-4 text-[#53615A]">
         <select
           id="select"
-          className="font-poppins text-s xl:text-s 2xl:text-xl text-[#53615A]"
+          className="font-poppins text-s xl:text-s 2xl:text-xl text-[#53615A] focus:outline-none focus:ring-0 "
           onChange={onChange ? onChange : handleChange} // onChange handler passed from parent
           value={value} // Ensure value is properly controlled
         >
           <option className="text-[#53615A]" value="">
             {placeholdertext}
           </option>
-          {data?.map((res) =>{
+          {data?.map((res) => {
             return (
               <option
                 key={res?.client?.id || res?.id || res?._id}

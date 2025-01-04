@@ -12,7 +12,7 @@ const Input = ({ text, value, onChange, styling }) => {
         placeholder={text}
         value={value}
         onChange={onChange}
-        className="placeholder:text-s md:placeholder:text-base lg:placeholder:text-lg md:text-xs lg:text-base"
+        className="placeholder:text-s md:placeholder:text-base lg:placeholder:text-lg md:text-xs lg:text-base focus:outline-none focus:ring-0"
       />
     </div>
   );

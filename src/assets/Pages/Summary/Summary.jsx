@@ -75,6 +75,14 @@ const Summary = () => {
    
     navigate("/")
   };
+  const toTitleCase = (str) => {
+    return str
+      .replace(/([A-Z])/g, " $1") // Add a space before each uppercase letter
+      .replace(/^./, (char) => char.toUpperCase()) // Capitalize the first character
+      .split(" ") // Split the string into words
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+      .join(" "); // Join them back with a space
+  };
   return (
     <div className='flex flex-col md:flex-row w-full h-screen bg-cover bg-center bg-no-repeat bg-[url("https://i.ibb.co/S69yyvw/thumbnail.jpg")]'>
       <SideNav />
@@ -104,10 +112,7 @@ const Summary = () => {
         {/* Schedule Created Text */}
         <div className="flex justify-between items-center bg-yellow-100 p-2 rounded-lg">
           <p>
-            Schedule created on:{" "}
-            <span className="font-bold">
-              {rateType.split("R")[0]} R{rateType.split("R")[1]}
-            </span>
+            Schedule created on: <span className="font-bold">{toTitleCase(rateType)}</span>
           </p>
         </div>
 

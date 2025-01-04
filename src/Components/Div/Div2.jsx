@@ -32,7 +32,6 @@ const Div2 = ({
   useEffect(() => {
     setBudget(fields?.budget);
     if (fields.no_of_copies && Object.keys(fields.no_of_copies).length > 0) {
-      console.log("Change in fields");
       setSelectedCopies(Object.keys(fields.no_of_copies).length);
       setDurations(
         Object.values(fields.no_of_copies).map((item) => item.Duration)
@@ -48,7 +47,6 @@ const Div2 = ({
 
     setBudget(value);
   };
-  console.log("Fields", fields.no_of_copies);
   useEffect(() => {
     if (
       durations.length === budgets.length &&

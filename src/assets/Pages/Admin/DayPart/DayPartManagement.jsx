@@ -128,12 +128,10 @@ const addDayPartTpye = async()=>{
 }
 
   const openModal = (type = "edit", slot) => {
-    console.log("Aaaa")
     if (type == "add") {
       setIsModalOpen(true);
       return;
     }
-    console.log("Aaaa 2",slot);
 
     setSelectedSlot(slot);
     setUpdatedDayPart(slot.dayPartTypeId);
@@ -226,7 +224,7 @@ const addDayPartTpye = async()=>{
             type="Standard Deviation"
           />
           <AdminInput
-            text="Pointing Threshold: "
+            text="Rating Threshold: "
             value={pointValue}
             setValue={setPointValue}
             handleValue={handleValue}
@@ -281,7 +279,7 @@ const addDayPartTpye = async()=>{
           </div>
         )}
         {selectedSlot &&
-          (console.log("Selected Slot:", selectedSlot), // Logs the selected slot to the console
+          (
           (
             <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
               <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
@@ -297,7 +295,6 @@ const addDayPartTpye = async()=>{
                 <div className="flex justify-end space-x-2">
                   <button
                     onClick={() => {
-                      console.log("Cancel button clicked");
                       setSelectedSlot(null);
                     }}
                     className="font-semibold px-4 py-2 rounded-full transition duration-300 bg-gray-300 text-gray-700 hover:bg-gray-400"
@@ -306,10 +303,7 @@ const addDayPartTpye = async()=>{
                   </button>
                   <button
                     onClick={() => {
-                      console.log(
-                        "Update button clicked with value:",
-                        updatedDayPart
-                      );
+                      
                       handleUpdate();
                     }}
                     className="font-semibold px-4 py-2 rounded-full transition duration-300 bg-gradient-to-r from-[#E73C30] to-[#F58220] text-white hover:bg-white hover:text-[#E73C30] hover:border-2 hover:border-[#E73C30]"
