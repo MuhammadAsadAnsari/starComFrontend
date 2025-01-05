@@ -18,7 +18,7 @@ const Div3 = ({
   const [genreEnum, setGenreEnum] = useState([]);
 
   const fetchGenres = async () => {
-    const genreResponse = await fetch(`${devTunnelUrl}get_genres`, {
+    const genreResponse = await fetch(`${devTunnelUrl}get_asscoiated_genres`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

@@ -42,7 +42,7 @@ const App = () => {
           <Route
             path="/file-history"
             element={
-              <ProtectedRoute allowedRoles={["super_user"]}>
+              <ProtectedRoute allowedRoles={["super_user","admin"]}>
                 <Schedule />
               </ProtectedRoute>
             }

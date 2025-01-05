@@ -21,6 +21,7 @@ const Schedule = () => {
   const [downloadEnabled, setDownloadEnabled] = useState(false);
   const [dataFounds, setDataFounds] = useState();
   const [fileData, setFileData] = useState([]);
+    localStorage.setItem("hideHomeIcon", true);
   const fetchClientData = async () => {
     try {
       const response = await fetch(`${devTunnelUrl}get_clients`, {
@@ -75,7 +76,7 @@ const Schedule = () => {
         URL.revokeObjectURL(url);
       })
       .catch((error) => {
-        console.error("Error fetching the buffer:", error);
+        toast.error("Error fetching the buffer:", error);
       });
   };
   const handleClientChange = async (value) => {

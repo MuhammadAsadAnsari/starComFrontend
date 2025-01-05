@@ -17,6 +17,7 @@ const Div2 = ({
   setSelectedCopies,
   fields,
   setValidatesCopies,
+  setFields
   // errors
 }) => {
   const copies = [
@@ -29,9 +30,13 @@ const Div2 = ({
   const [defualtError, setDefualtError] = useState(false);
   const [isBugdetPercentageValid, setIsBudgetPercentageValid] = useState(false);
   const [isDurationValid, setIsDurationValid] = useState(false);
+  
   useEffect(() => {
-    setBudget(fields?.budget);
+    if(fields?.budget) {setBudget((prev)=> prev=fields.budget)
+      
+    };
     if (fields.no_of_copies && Object.keys(fields.no_of_copies).length > 0) {
+ 
       setSelectedCopies(Object.keys(fields.no_of_copies).length);
       setDurations(
         Object.values(fields.no_of_copies).map((item) => item.Duration)
@@ -46,6 +51,7 @@ const Div2 = ({
     const value = e.target.value;
 
     setBudget(value);
+    
   };
   useEffect(() => {
     if (
