@@ -234,7 +234,7 @@ const GetAllUsers = () => {
   const getAllClients = async () => {
     try {
       const response = await fetch(
-        `${devTunnelUrl}get_clients_with_brands?active=true`,
+        `${devTunnelUrl}get_clients_with_brands?active="true"`,
         {
           method: "GET",
           headers: {
