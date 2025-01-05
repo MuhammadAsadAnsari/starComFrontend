@@ -42,7 +42,7 @@ const Home = () => {
   const role = localStorage.getItem("userRole");
   const [clientName, setClientName] = useState("");
   const [brandName, setBrandName] = useState("");
-
+localStorage.setItem("hideHomeIcon", false);
 
   let validatebudget = !fields.budget;
   useEffect(() => {
@@ -95,42 +95,45 @@ const Home = () => {
         }
       );
       const data = await clientDetailsResponse.json();
-      
+
       setClientName(data.data.client.name);
     } catch (error) {
       toast.error("An error occurred..");
     }
   };
 
-   const getBrandDetails = async (brandId) => {
-     try {
-       const brandDetailsResponse = await fetch(
-         `${devTunnelUrl}get_brand_name/${brandId}`,
-         {
-           method: "GET",
-           headers: {
-             "Content-Type": "application/json",
-             Authorization: `${authToken}`,
-           },
-         }
-       );
-       
-       const data = await brandDetailsResponse.json();
+  const getBrandDetails = async (brandId) => {
+    try {
+      const brandDetailsResponse = await fetch(
+        `${devTunnelUrl}get_brand_name/${brandId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${authToken}`,
+          },
+        }
+      );
 
-       setBrandName(data.brand.name);
-     } catch (error) {
-       toast.error("An error occurred.");
-     }
-   };
+      const data = await brandDetailsResponse.json();
+
+      setBrandName(data.brand.name);
+    } catch (error) {
+      toast.error("An error occurred.");
+    }
+  };
   const fetchDayPartsTypes = async () => {
     try {
-      const dayPartReponse = await fetch(`${devTunnelUrl}get_daypart_types`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${authToken}`,
-        },
-      });
+      const dayPartReponse = await fetch(
+        `${devTunnelUrl}get_associated_daypart_types`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${authToken}`,
+          },
+        }
+      );
       const dayPartEnumData = await dayPartReponse.json();
 
       if (!dayPartReponse.ok)
@@ -246,13 +249,12 @@ const Home = () => {
         client_id: fields.client_id,
         select: fields.select,
         dates: fields.dates,
-        budget: fields?.budget || parseInt(budget),
+        budget: parseInt(budget) || fields?.budget,
         no_of_copies: noOfCopies,
         day_part: dayParts,
         genre: genreSplitFields,
         download: false,
       };
-      console.log("🚀 ~ handleSubmit ~ newfields:", newfields)
 
       // return
       const formData = new FormData();
@@ -279,7 +281,7 @@ const Home = () => {
           body: formData,
         });
         if (!response.ok)
-          return toast.error("Error creating summary:", response.message);
+          return toast.error("Error creating summary:", response?.message);
 
         const data = await response.json();
 
@@ -288,20 +290,21 @@ const Home = () => {
 
         navigate("/summary");
       } catch (error) {
-        toast.error(response.message);
+        toast.error(response?.message);
       } finally {
         setIsLoading(false);
       }
     }
+      
   };
-const toTitleCase = (str) => {
-  return str
-    .replace(/([A-Z])/g, " $1") // Add a space before each uppercase letter
-    .replace(/^./, (char) => char.toUpperCase()) // Capitalize the first character
-    .split(" ") // Split the string into words
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
-    .join(" "); // Join them back with a space
-};
+  const toTitleCase = (str) => {
+    return str
+      .replace(/([A-Z])/g, " $1") // Add a space before each uppercase letter
+      .replace(/^./, (char) => char.toUpperCase()) // Capitalize the first character
+      .split(" ") // Split the string into words
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+      .join(" "); // Join them back with a space
+  };
   return (
     <div className='flex flex-col md:flex-row w-full h-screen bg-cover bg-center bg-no-repeat bg-[url("https://i.ibb.co/S69yyvw/thumbnail.jpg")]'>
       <SideNav setFields={setFields} />
@@ -326,7 +329,10 @@ const toTitleCase = (str) => {
               <Button
                 text="Admin Panel"
                 styling="w-32 h-16 mt-16 mr-4"
-                onClick={() => navigate("/file-history")}
+                onClick={() => {
+                
+                  navigate("/file-history");
+                }}
               />
             )}
           </div>
@@ -373,7 +379,7 @@ const toTitleCase = (str) => {
                       styling="s:mx-1 s:w-[25%] s:justify-between"
                     />
                   );
-                } else if (key =="brand_id") {
+                } else if (key == "brand_id") {
                   getBrandDetails(value);
                   return (
                     <SelectedDropDown
@@ -410,6 +416,7 @@ const toTitleCase = (str) => {
                 setSelectedCopies={setSelectedCopies}
                 fields={fields}
                 setValidatesCopies={setValidatesCopies}
+                setFields = {setFields}
               />
               <Div3
                 genreSplitFields={genreSplitFields}

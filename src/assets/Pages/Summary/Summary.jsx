@@ -17,6 +17,7 @@ const Summary = () => {
   const data = JSON.parse(localStorage.getItem("data"));
 
   let user_data = JSON.parse(localStorage.getItem("user_data"));
+  localStorage.setItem("hideHomeIcon", true);
   const rateType = user_data.select;
 
   user_data = {
@@ -60,11 +61,12 @@ const Summary = () => {
         // Create a download link (for example)
         const a = document.createElement("a");
         a.href = url;
-        a.download = "summary.xlsx";
+        a.download = "Schedule.xlsx";
         a.click();
 
         URL.revokeObjectURL(url);
         setIsDownloaded(true);
+        setIsLoading(false)
       })
       .catch((error) => {
         toast.error("Error downloading file.");

@@ -61,11 +61,9 @@ const ClientAndBrandManagement = () => {
         setClients(Array.isArray(data) ? data : []);
         setBrandInputs(Array.isArray(data) ? Array(data.length).fill("") : []);
       } else {
-        console.error("Failed to fetch clients");
         setClients([]);
       }
     } catch (error) {
-      console.error("Error fetching clients:", error);
       setClients([]);
     }
   };
@@ -104,7 +102,6 @@ const ClientAndBrandManagement = () => {
         toast.error(data.message || "Failed to add client");
       }
     } catch (error) {
-      console.error("Error adding client:", error);
       toast.error("An error occurred while adding the client.");
     }
   };
@@ -150,7 +147,6 @@ const ClientAndBrandManagement = () => {
         toast.error(data.message || "Failed to add brand");
       }
     } catch (error) {
-      console.error("Error adding brand:", error);
       toast.error("An error occurred while adding the brand.");
     }
   };
@@ -220,7 +216,6 @@ const ClientAndBrandManagement = () => {
         toast.error(data.message || "Failed to update client and brands");
       }
     } catch (error) {
-      console.error("Error updating client and brands:", error);
       toast.error("An error occurred while updating.");
     }
   };

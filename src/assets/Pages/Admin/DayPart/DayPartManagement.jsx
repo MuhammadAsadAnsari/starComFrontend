@@ -54,7 +54,6 @@ const [dayPartType,setDayPartType] = useState("")
       toast.error(data.message || "Failed to fetch standard Deviation.");
     }
   } catch (error) {
-    console.error("Error fetching day parts:", error);
     toast.error("An error occurred while fetching standard Deviation.");
   }
   }
@@ -86,11 +85,9 @@ const [dayPartType,setDayPartType] = useState("")
         setTotalRecords(data.total);
         setDayPartEnum(dayPartEnumData);
       } else {
-        console.error("Failed to fetch day parts:", data.message);
         toast.error(data.message || "Failed to fetch day parts.");
       }
     } catch (error) {
-      console.error("Error fetching day parts:", error);
       toast.error("An error occurred while fetching day parts.");
     }
   };
@@ -122,7 +119,6 @@ const addDayPartTpye = async()=>{
     toast.error(data.message || "Failed to add day part");
   }
    } catch (error) {
-     console.error("Error adding genre:", error);
      toast.error("An error occurred while adding the genre.");
    }
 }
@@ -175,7 +171,6 @@ const addDayPartTpye = async()=>{
         toast.error(data.message || "Failed to update day part");
       }
     } catch (error) {
-      console.error("Error updating day part:", error);
       toast.error("An error occurred while updating the day part.");
     }
   };
@@ -203,7 +198,6 @@ const addDayPartTpye = async()=>{
     toast.error(data.message || "Failed to update day part");
        }
     } catch (error) {
-      console.error("Error updating standard deviation", error);
       toast.error("An error occurred while updating the standard deviation");
     }
   }

@@ -71,7 +71,6 @@ const GenreManagement = () => {
         toast.error(data.message || "Failed to fetch genres.");
       }
     } catch (error) {
-      console.error("Error fetching genres:", error);
       toast.error("An error occurred while fetching genres.");
     }
   };
@@ -125,7 +124,6 @@ const GenreManagement = () => {
         toast.error(data.message || "Failed to add genre.");
       }
     } catch (error) {
-      console.error("Error adding genre:", error);
       toast.error("An error occurred while adding the genre.");
     }
   };
@@ -163,7 +161,6 @@ const GenreManagement = () => {
         toast.error(data.message || "Failed to update genre.");
       }
     } catch (error) {
-      console.error("Error updating genre:", error);
       toast.error("An error occurred while updating the genre.");
     }
   };
